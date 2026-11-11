@@ -1,0 +1,106 @@
+[
+ {
+  "status": "changed",
+  "file": "src/main/java/org/apache/commons/cli/HelpFormatter.java",
+  "member": "HelpFormatter.getDescription(Option)",
+  "old": {
+   "start": 220,
+   "end": 229,
+   "text": "    /**\n     * Gets the option description or an empty string if the description is {@code null}.\n     * @param option The option to get the description from.\n     * @return the option description or an empty string if the description is {@code null}.\n     * @since 1.8.0\n     */\n    public static String getDescription(final Option option) {\n        final String desc = option.getDescription();\n        return desc == null ? \"\" : desc;\n    }"
+  },
+  "new": {
+   "start": 220,
+   "end": 228,
+   "text": "    /**\n     * Gets the option description or an empty string if the description is {@code null}.\n     * @param option The option to get the description from.\n     * @return the option description or an empty string if the description is {@code null}.\n     * @since 1.8.0\n     */\n    public static String getDescription(final Option option) {\n        return option.getDescriptionOrEmpty();\n    }"
+  }
+ },
+ {
+  "status": "changed",
+  "file": "src/main/java/org/apache/commons/cli/HelpFormatter.java",
+  "member": "HelpFormatter.appendOption(StringBuilder,Option,boolean)",
+  "old": {
+   "start": 339,
+   "end": 364,
+   "text": "    /**\n     * Appends the usage clause for an Option to a StringBuffer.\n     *\n     * @param buff the StringBuffer to append to\n     * @param option the Option to append\n     * @param required whether the Option is required or not\n     */\n    private void appendOption(final StringBuilder buff, final Option option, final boolean required) {\n        if (!required) {\n            buff.append(\"[\");\n        }\n        if (option.getOpt() != null) {\n            buff.append(\"-\").append(option.getOpt());\n        } else {\n            buff.append(\"--\").append(option.getLongOpt());\n        }\n        // if the Option has a value and a non blank argname\n        if (option.hasArg() && (option.getArgName() == null || !option.getArgName().isEmpty())) {\n            buff.append(option.getOpt() == null ? longOptSeparator : \" \");\n            buff.append(\"<\").append(option.getArgName() != null ? option.getArgName() : getArgName()).append(\">\");\n        }\n        // if the Option is not a required option\n        if (!required) {\n            buff.append(\"]\");\n        }\n    }"
+  },
+  "new": {
+   "start": 338,
+   "end": 354,
+   "text": "    /**\n     * Appends the usage clause for an Option to a StringBuffer.\n     *\n     * @param buff the StringBuffer to append to\n     * @param option the Option to append\n     * @param required whether the Option is required or not\n     */\n    private void appendOption(final StringBuilder buff, final Option option, final boolean required) {\n        if (!required) {\n            buff.append(\"[\");\n        }\n        buff.append(option.toLabel(\"-\", \"--\", longOptSeparator, getArgName()));\n        // if the Option is not a required option\n        if (!required) {\n            buff.append(\"]\");\n        }\n    }"
+  }
+ },
+ {
+  "status": "changed",
+  "file": "src/main/java/org/apache/commons/cli/HelpFormatter.java",
+  "member": "HelpFormatter.appendOptions(A,int,Options,int,int)",
+  "old": {
+   "start": 396,
+   "end": 478,
+   "text": "    /**\n     * Renders the specified Options and return the rendered Options in a StringBuffer.\n     *\n     * @param sb The StringBuffer to place the rendered Options into.\n     * @param width The number of characters to display per line\n     * @param options The command line Options\n     * @param leftPad the number of characters of padding to be prefixed to each line\n     * @param descPad the number of characters of padding to be prefixed to each description line\n     * @return the StringBuffer with the rendered Options contents.\n     * @throws IOException if an I/O error occurs.\n     */\n    <A extends Appendable> A appendOptions(final A sb, final int width, final Options options, final int leftPad, final int descPad) throws IOException {\n        final String lpad = createPadding(leftPad);\n        final String dpad = createPadding(descPad);\n        // first create list containing only <lpad>-a,--aaa where\n        // -a is opt and --aaa is long opt; in parallel look for\n        // the longest opt string this list will be then used to\n        // sort options ascending\n        int max = 0;\n        final int maxSince = showSince ? determineMaxSinceLength(options) + leftPad : 0;\n        final List<StringBuilder> prefixList = new ArrayList<>();\n        final List<Option> optList = options.helpOptions();\n        if (getOptionComparator() != null) {\n            Collections.sort(optList, getOptionComparator());\n        }\n        for (final Option option : optList) {\n            final StringBuilder optBuf = new StringBuilder();\n            if (option.getOpt() == null) {\n                optBuf.append(lpad).append(\"   \").append(getLongOptPrefix()).append(option.getLongOpt());\n            } else {\n                optBuf.append(lpad).append(getOptPrefix()).append(option.getOpt());\n                if (option.hasLongOpt()) {\n                    optBuf.append(',').append(getLongOptPrefix()).append(option.getLongOpt());\n                }\n            }\n            if (option.hasArg()) {\n                final String argName = option.getArgName();\n                if (argName != null && argName.isEmpty()) {\n                    // if the option has a blank argname\n                    optBuf.append(' ');\n                } else {\n                    optBuf.append(option.hasLongOpt() ? longOptSeparator : \" \");\n                    optBuf.append(\"<\").append(argName != null ? option.getArgName() : getArgName()).append(\">\");\n                }\n            }\n\n            prefixList.add(optBuf);\n            max = Math.max(optBuf.length() + maxSince, max);\n        }\n        final int nextLineTabStop = max + descPad;\n        if (showSince) {\n            final StringBuilder optHeader = new StringBuilder(HEADER_OPTIONS).append(createPadding(max - maxSince - HEADER_OPTIONS.length() + leftPad))\n                    .append(HEADER_SINCE);\n            optHeader.append(createPadding(max - optHeader.length())).append(lpad).append(HEADER_DESCRIPTION);\n            appendWrappedText(sb, width, nextLineTabStop, optHeader.toString());\n            sb.append(getNewLine());\n        }\n\n        int x = 0;\n        for (final Iterator<Option> it = optList.iterator(); it.hasNext();) {\n            final Option option = it.next();\n            final StringBuilder optBuf = new StringBuilder(prefixList.get(x++).toString());\n            if (optBuf.length() < max) {\n                optBuf.append(createPadding(max - maxSince - optBuf.length()));\n                if (showSince) {\n                    optBuf.append(lpad).append(option.getSince() == null ? \"-\" : option.getSince());\n                }\n                optBuf.append(createPadding(max - optBuf.length()));\n            }\n            optBuf.append(dpad);\n\n            if (deprecatedFormatFunction != null && option.isDeprecated()) {\n                optBuf.append(deprecatedFormatFunction.apply(option).trim());\n            } else if (option.getDescription() != null) {\n                optBuf.append(option.getDescription());\n            }\n            appendWrappedText(sb, width, nextLineTabStop, optBuf.toString());\n            if (it.hasNext()) {\n                sb.append(getNewLine());\n            }\n        }\n        return sb;\n    }"
+  },
+  "new": {
+   "start": 386,
+   "end": 449,
+   "text": "    /**\n     * Renders the specified Options and return the rendered Options in a StringBuffer.\n     *\n     * @param sb The StringBuffer to place the rendered Options into.\n     * @param width The number of characters to display per line\n     * @param options The command line Options\n     * @param leftPad the number of characters of padding to be prefixed to each line\n     * @param descPad the number of characters of padding to be prefixed to each description line\n     * @return the StringBuffer with the rendered Options contents.\n     * @throws IOException if an I/O error occurs.\n     */\n    <A extends Appendable> A appendOptions(final A sb, final int width, final Options options, final int leftPad, final int descPad) throws IOException {\n        final String lpad = createPadding(leftPad);\n        final String dpad = createPadding(descPad);\n        // first create list containing only <lpad>-a,--aaa where\n        // -a is opt and --aaa is long opt; in parallel look for\n        // the longest opt string this list will be then used to\n        // sort options ascending\n        int max = 0;\n        final int maxSince = showSince ? determineMaxSinceLength(options) + leftPad : 0;\n        final List<StringBuilder> prefixList = new ArrayList<>();\n        final List<Option> optList = options.helpOptions();\n        if (getOptionComparator() != null) {\n            Collections.sort(optList, getOptionComparator());\n        }\n        for (final Option option : optList) {\n            final StringBuilder optBuf = option.toLabel(lpad, getOptPrefix(), getLongOptPrefix(), longOptSeparator, getArgName());\n            prefixList.add(optBuf);\n            max = Math.max(optBuf.length() + maxSince, max);\n        }\n        final int nextLineTabStop = max + descPad;\n        if (showSince) {\n            final StringBuilder optHeader = new StringBuilder(HEADER_OPTIONS).append(createPadding(max - maxSince - HEADER_OPTIONS.length() + leftPad))\n                    .append(HEADER_SINCE);\n            optHeader.append(createPadding(max - optHeader.length())).append(lpad).append(HEADER_DESCRIPTION);\n            appendWrappedText(sb, width, nextLineTabStop, optHeader.toString());\n            sb.append(getNewLine());\n        }\n\n        int x = 0;\n        for (final Iterator<Option> it = optList.iterator(); it.hasNext();) {\n            final Option option = it.next();\n            final StringBuilder optBuf = new StringBuilder(prefixList.get(x++).toString());\n            if (optBuf.length() < max) {\n                optBuf.append(createPadding(max - maxSince - optBuf.length()));\n                if (showSince) {\n                    optBuf.append(lpad).append(option.getSince() == null ? \"-\" : option.getSince());\n                }\n                optBuf.append(createPadding(max - optBuf.length()));\n            }\n            optBuf.append(dpad);\n\n            if (deprecatedFormatFunction != null && option.isDeprecated()) {\n                optBuf.append(deprecatedFormatFunction.apply(option).trim());\n            } else {\n                optBuf.append(option.getDescriptionOrEmpty());\n            }\n            appendWrappedText(sb, width, nextLineTabStop, optBuf.toString());\n            if (it.hasNext()) {\n                sb.append(getNewLine());\n            }\n        }\n        return sb;\n    }"
+  }
+ },
+ {
+  "status": "new",
+  "file": "src/main/java/org/apache/commons/cli/Option.java",
+  "member": "Option.getDescriptionOrEmpty()",
+  "old": null,
+  "new": {
+   "start": 622,
+   "end": 629,
+   "text": "    /**\n     * Gets the self-documenting description of this Option, or an empty string if the description is {@code null}.\n     *\n     * @return The string description of this option, or an empty string if {@code null}.\n     */\n    String getDescriptionOrEmpty() {\n        return description == null ? \"\" : description;\n    }"
+  }
+ },
+ {
+  "status": "new",
+  "file": "src/main/java/org/apache/commons/cli/Option.java",
+  "member": "Option.toLabel(String,String)",
+  "old": null,
+  "new": {
+   "start": 1004,
+   "end": 1013,
+   "text": "    /**\n     * Formats the short or long option name using the given prefixes.\n     *\n     * @param optPrefix The prefix for a short option.\n     * @param longOptPrefix The prefix for a long option.\n     * @return The formatted option label.\n     */\n    String toLabel(final String optPrefix, final String longOptPrefix) {\n        return option != null ? optPrefix + option : longOptPrefix + longOption;\n    }"
+  }
+ },
+ {
+  "status": "new",
+  "file": "src/main/java/org/apache/commons/cli/Option.java",
+  "member": "Option.toLabel(String,String,String,String)",
+  "old": null,
+  "new": {
+   "start": 1015,
+   "end": 1032,
+   "text": "    /**\n     * Formats the usage clause label for this Option (short or long option name and optional argument name).\n     *\n     * @param optPrefix The prefix for a short option.\n     * @param longOptPrefix The prefix for a long option.\n     * @param longOptSeparator The separator between a long option and its argument.\n     * @param defaultArgName The default argument name when none is set on this option.\n     * @return The formatted usage option label.\n     */\n    String toLabel(final String optPrefix, final String longOptPrefix, final String longOptSeparator, final String defaultArgName) {\n        final StringBuilder buff = new StringBuilder(toLabel(optPrefix, longOptPrefix));\n        // if the Option has a value and a non blank argname\n        if (hasArg() && (argName == null || !argName.isEmpty())) {\n            buff.append(option == null ? longOptSeparator : \" \");\n            buff.append(\"<\").append(argName != null ? argName : defaultArgName).append(\">\");\n        }\n        return buff.toString();\n    }"
+  }
+ },
+ {
+  "status": "new",
+  "file": "src/main/java/org/apache/commons/cli/Option.java",
+  "member": "Option.toLabel(String,String,String,String,String)",
+  "old": null,
+  "new": {
+   "start": 1034,
+   "end": 1065,
+   "text": "    /**\n     * Builds the padded help table prefix label for this Option (short/long option names and optional argument name).\n     *\n     * @param lpad The left padding string.\n     * @param optPrefix The prefix for a short option.\n     * @param longOptPrefix The prefix for a long option.\n     * @param longOptSeparator The separator between a long option and its argument.\n     * @param defaultArgName The default argument name when none is set on this option.\n     * @return A StringBuilder containing the formatted help option label.\n     */\n    StringBuilder toLabel(final String lpad, final String optPrefix, final String longOptPrefix, final String longOptSeparator,\n            final String defaultArgName) {\n        final StringBuilder optBuf = new StringBuilder();\n        if (option == null) {\n            optBuf.append(lpad).append(\"   \").append(longOptPrefix).append(longOption);\n        } else {\n            optBuf.append(lpad).append(optPrefix).append(option);\n            if (hasLongOpt()) {\n                optBuf.append(',').append(longOptPrefix).append(longOption);\n            }\n        }\n        if (hasArg()) {\n            if (argName != null && argName.isEmpty()) {\n                // if the option has a blank argname\n                optBuf.append(' ');\n            } else {\n                optBuf.append(hasLongOpt() ? longOptSeparator : \" \");\n                optBuf.append(\"<\").append(argName != null ? argName : defaultArgName).append(\">\");\n            }\n        }\n        return optBuf;\n    }"
+  }
+ },
+ {
+  "status": "changed",
+  "file": "src/main/java/org/apache/commons/cli/OptionGroup.java",
+  "member": "OptionGroup.toString()",
+  "old": {
+   "start": 137,
+   "end": 168,
+   "text": "    /**\n     * Returns the stringified version of this OptionGroup.\n     *\n     * @return the stringified representation of this group\n     */\n    @Override\n    public String toString() {\n        final StringBuilder buff = new StringBuilder();\n        final Iterator<Option> iter = getOptions().iterator();\n        buff.append(\"[\");\n        while (iter.hasNext()) {\n            final Option option = iter.next();\n            if (option.getOpt() != null) {\n                buff.append(\"-\");\n                buff.append(option.getOpt());\n            } else {\n                buff.append(\"--\");\n                buff.append(option.getLongOpt());\n            }\n\n            if (option.getDescription() != null) {\n                buff.append(Char.SP);\n                buff.append(option.getDescription());\n            }\n\n            if (iter.hasNext()) {\n                buff.append(\", \");\n            }\n        }\n        buff.append(\"]\");\n        return buff.toString();\n    }"
+  },
+  "new": {
+   "start": 137,
+   "end": 162,
+   "text": "    /**\n     * Returns the stringified version of this OptionGroup.\n     *\n     * @return the stringified representation of this group\n     */\n    @Override\n    public String toString() {\n        final StringBuilder buff = new StringBuilder();\n        final Iterator<Option> iter = getOptions().iterator();\n        buff.append(\"[\");\n        while (iter.hasNext()) {\n            final Option option = iter.next();\n            buff.append(option.toLabel(\"-\", \"--\"));\n\n            if (option.getDescription() != null) {\n                buff.append(Char.SP);\n                buff.append(option.getDescription());\n            }\n\n            if (iter.hasNext()) {\n                buff.append(\", \");\n            }\n        }\n        buff.append(\"]\");\n        return buff.toString();\n    }"
+  }
+ }
+]

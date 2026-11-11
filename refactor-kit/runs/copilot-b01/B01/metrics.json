@@ -1,0 +1,291 @@
+{
+ "run": "B01 - Copilot-B01",
+ "tool": "com.github.mauricioaniche:ck:0.7.0",
+ "measured": "2026-11-10 21:25",
+ "before_commit": "698b238276c0e22e97e4aec703a0b00201d29666",
+ "after_commit": "99b5beacf74bca1c1f5a4163fd948d8e573d00f7",
+ "files": [
+  "src/main/java/org/apache/commons/cli/HelpFormatter.java",
+  "src/main/java/org/apache/commons/cli/Option.java",
+  "src/main/java/org/apache/commons/cli/OptionGroup.java"
+ ],
+ "class_rule": "the top-level class of every affected file (the smell's target files plus the source files the run changed), plus any other class in those files that holds a target member, is new or removed, or whose CK metrics changed",
+ "metrics": {
+  "Size": {
+   "before": 845,
+   "after": 844,
+   "change": -1,
+   "ck": "loc",
+   "aggregate": "sum",
+   "label": "LOC (CK loc)"
+  },
+  "Cohesion": {
+   "before": 0.8739,
+   "after": 0.8742,
+   "change": 0.0003,
+   "ck": "lcom*",
+   "aggregate": "mean",
+   "label": "LCOM* (CK lcom*, Henderson-Sellers; 0 = cohesive, 1 = no cohesion)"
+  },
+  "Coupling": {
+   "before": 18,
+   "after": 18,
+   "change": 0,
+   "ck": "cbo",
+   "aggregate": "sum",
+   "label": "CBO (CK cbo)"
+  }
+ },
+ "classes": [
+  {
+   "class": "org.apache.commons.cli.HelpFormatter",
+   "file": "src/main/java/org/apache/commons/cli/HelpFormatter.java",
+   "counted": true,
+   "before": {
+    "loc": 425,
+    "wmc": 121,
+    "cbo": 9,
+    "rfc": 77,
+    "lcom": 1092,
+    "lcom*": 0.9549,
+    "tcc": 0,
+    "totalMethodsQty": 49
+   },
+   "after": {
+    "loc": 415,
+    "wmc": 119,
+    "cbo": 9,
+    "rfc": 77,
+    "lcom": 1092,
+    "lcom*": 0.9549,
+    "tcc": 0,
+    "totalMethodsQty": 49
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.HelpFormatter$Builder",
+   "file": "src/main/java/org/apache/commons/cli/HelpFormatter.java",
+   "counted": false,
+   "before": {
+    "loc": 24,
+    "wmc": 6,
+    "cbo": 3,
+    "rfc": 4,
+    "lcom": 4,
+    "lcom*": 0.65,
+    "tcc": 0,
+    "totalMethodsQty": 5
+   },
+   "after": {
+    "loc": 24,
+    "wmc": 6,
+    "cbo": 3,
+    "rfc": 4,
+    "lcom": 4,
+    "lcom*": 0.65,
+    "tcc": 0,
+    "totalMethodsQty": 5
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.HelpFormatter$OptionComparator",
+   "file": "src/main/java/org/apache/commons/cli/HelpFormatter.java",
+   "counted": false,
+   "before": {
+    "loc": 6,
+    "wmc": 1,
+    "cbo": 1,
+    "rfc": 2,
+    "lcom": 0,
+    "lcom*": 1,
+    "tcc": null,
+    "totalMethodsQty": 1
+   },
+   "after": {
+    "loc": 6,
+    "wmc": 1,
+    "cbo": 1,
+    "rfc": 2,
+    "lcom": 0,
+    "lcom*": 1,
+    "tcc": null,
+    "totalMethodsQty": 1
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.Option",
+   "file": "src/main/java/org/apache/commons/cli/Option.java",
+   "counted": true,
+   "before": {
+    "loc": 357,
+    "wmc": 86,
+    "cbo": 6,
+    "rfc": 37,
+    "lcom": 836,
+    "lcom*": 0.889,
+    "tcc": 0,
+    "totalMethodsQty": 53
+   },
+   "after": {
+    "loc": 373,
+    "wmc": 92,
+    "cbo": 6,
+    "rfc": 37,
+    "lcom": 897,
+    "lcom*": 0.8898,
+    "tcc": 0,
+    "totalMethodsQty": 55
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.Option$Builder",
+   "file": "src/main/java/org/apache/commons/cli/Option.java",
+   "counted": false,
+   "before": {
+    "loc": 98,
+    "wmc": 27,
+    "cbo": 5,
+    "rfc": 7,
+    "lcom": 146,
+    "lcom*": 0.8755,
+    "tcc": 0,
+    "totalMethodsQty": 21
+   },
+   "after": {
+    "loc": 98,
+    "wmc": 27,
+    "cbo": 5,
+    "rfc": 7,
+    "lcom": 146,
+    "lcom*": 0.8755,
+    "tcc": 0,
+    "totalMethodsQty": 21
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.OptionGroup",
+   "file": "src/main/java/org/apache/commons/cli/OptionGroup.java",
+   "counted": true,
+   "before": {
+    "loc": 63,
+    "wmc": 17,
+    "cbo": 3,
+    "rfc": 15,
+    "lcom": 22,
+    "lcom*": 0.7778,
+    "tcc": 0,
+    "totalMethodsQty": 9
+   },
+   "after": {
+    "loc": 56,
+    "wmc": 17,
+    "cbo": 3,
+    "rfc": 16,
+    "lcom": 22,
+    "lcom*": 0.7778,
+    "tcc": 0,
+    "totalMethodsQty": 9
+   }
+  }
+ ],
+ "methods": [
+  {
+   "class": "org.apache.commons.cli.HelpFormatter",
+   "method": "getDescription/1[org.apache.commons.cli.Option]",
+   "status": "target",
+   "line": 226,
+   "before": {
+    "loc": 4,
+    "wmc": 2,
+    "parametersQty": 1,
+    "cbo": 1
+   },
+   "after": {
+    "loc": 3,
+    "wmc": 1,
+    "parametersQty": 1,
+    "cbo": 1
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.HelpFormatter",
+   "method": "appendOption/3[java.lang.StringBuilder,org.apache.commons.cli.Option,boolean]",
+   "status": "target",
+   "line": 345,
+   "before": {
+    "loc": 18,
+    "wmc": 9,
+    "parametersQty": 3,
+    "cbo": 2
+   },
+   "after": {
+    "loc": 13,
+    "wmc": 9,
+    "parametersQty": 3,
+    "cbo": 2
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.HelpFormatter",
+   "method": "appendOptions/5[A,int,org.apache.commons.cli.Options,int,int]",
+   "status": "target",
+   "line": 402,
+   "before": {
+    "loc": 66,
+    "wmc": 20,
+    "parametersQty": 5,
+    "cbo": 4
+   },
+   "after": {
+    "loc": 62,
+    "wmc": 19,
+    "parametersQty": 5,
+    "cbo": 4
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.Option",
+   "method": "getDescriptionOrEmpty/0",
+   "status": "new",
+   "line": 627,
+   "before": null,
+   "after": {
+    "loc": 3,
+    "wmc": 2,
+    "parametersQty": 0,
+    "cbo": 0
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.Option",
+   "method": "toLabel/2[java.lang.String,java.lang.String]",
+   "status": "new",
+   "line": 679,
+   "before": null,
+   "after": {
+    "loc": 13,
+    "wmc": 4,
+    "parametersQty": 2,
+    "cbo": 0
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.OptionGroup",
+   "method": "toString/0",
+   "status": "target",
+   "line": 143,
+   "before": {
+    "loc": 25,
+    "wmc": 5,
+    "parametersQty": 0,
+    "cbo": 2
+   },
+   "after": {
+    "loc": 18,
+    "wmc": 5,
+    "parametersQty": 0,
+    "cbo": 2
+   }
+  }
+ ]
+}

@@ -1,0 +1,163 @@
+# TASK - refactor smell W01 (Long Method) in Apache Commons CLI 1.9.0
+
+| | |
+|---|---|
+| Run | Copilot-W01 · Copilot SDK in VS Code (2026-11-10) · mode: agent · started 2026-11-10 21:19 |
+| Workspace (edit only here) | `workspace/copilot-w01/commons-cli` |
+| Branch | `refactor/W01`, created from `rel/commons-cli-1.9.0` (commit 698b238276) |
+| Your process notes | `runs/copilot-w01/W01/process.md` |
+| Original code saved in | `runs/copilot-w01/W01/original/` |
+
+## 1. The smell
+
+| Field | Value |
+|---|---|
+| ID | W01 |
+| Smell type | Within class |
+| Code smell | Long Method |
+| Class(es) | HelpFormatter |
+| Method / member | appendOptions(A, int, Options, int, int) |
+| Lines (1.9.0) | 407–478 |
+| Priority |  |
+
+**Evidence.** 72 lines (NLOC 64), cyclomatic complexity 20, 5 parameters: the largest and most complex method in the library. One body does three jobs: (1) builds each option's "-a,--aaa <arg>" label and tracks the widest one (421–444); (2) writes the optional "Options / Since / Description" header (446–452); (3) pads and writes each row with its description or deprecation text (454–476).
+
+
+## 2. The refactoring to apply
+
+**Technique:** Extract Method (×3); Replace Temp with Query where practical
+
+_Source: review sheet suggestion (column 'Suggested refactoring')._
+
+**How (outline):** Extract buildOptionLabel(Option, lpad) from the first loop body, appendSinceHeader(...) from the showSince block, and appendOptionRow(...) from the second loop body. appendOptions keeps only the sequence: sort → labels → header → rows.
+
+**Risks to watch:** Low. Package-private method; HelpFormatterTest pins the exact output strings, so behaviour changes are caught.
+
+**Expected effect on metrics:** Size: NLOC and complexity of appendOptions drop sharply; class gains ~3 private methods. Cohesion / coupling: about unchanged.
+
+
+Apply **this** technique and nothing else. If you believe it cannot be applied without breaking a rule below, stop, explain why in process.md section 5, and run `finish` without making a different refactoring.
+
+## 3. Where the code is (original, before refactoring)
+
+- `src/main/java/org/apache/commons/cli/HelpFormatter.java` > `HelpFormatter.appendOptions(A,int,Options,int,int)` (lines 396-478)
+
+Most relevant test classes: HelpFormatterTest
+
+#### `HelpFormatter.java` > `HelpFormatter.appendOptions(A,int,Options,int,int)` (lines 396-478)
+
+```java
+    /**
+     * Renders the specified Options and return the rendered Options in a StringBuffer.
+     *
+     * @param sb The StringBuffer to place the rendered Options into.
+     * @param width The number of characters to display per line
+     * @param options The command line Options
+     * @param leftPad the number of characters of padding to be prefixed to each line
+     * @param descPad the number of characters of padding to be prefixed to each description line
+     * @return the StringBuffer with the rendered Options contents.
+     * @throws IOException if an I/O error occurs.
+     */
+    <A extends Appendable> A appendOptions(final A sb, final int width, final Options options, final int leftPad, final int descPad) throws IOException {
+        final String lpad = createPadding(leftPad);
+        final String dpad = createPadding(descPad);
+        // first create list containing only <lpad>-a,--aaa where
+        // -a is opt and --aaa is long opt; in parallel look for
+        // the longest opt string this list will be then used to
+        // sort options ascending
+        int max = 0;
+        final int maxSince = showSince ? determineMaxSinceLength(options) + leftPad : 0;
+        final List<StringBuilder> prefixList = new ArrayList<>();
+        final List<Option> optList = options.helpOptions();
+        if (getOptionComparator() != null) {
+            Collections.sort(optList, getOptionComparator());
+        }
+        for (final Option option : optList) {
+            final StringBuilder optBuf = new StringBuilder();
+            if (option.getOpt() == null) {
+                optBuf.append(lpad).append("   ").append(getLongOptPrefix()).append(option.getLongOpt());
+            } else {
+                optBuf.append(lpad).append(getOptPrefix()).append(option.getOpt());
+                if (option.hasLongOpt()) {
+                    optBuf.append(',').append(getLongOptPrefix()).append(option.getLongOpt());
+                }
+            }
+            if (option.hasArg()) {
+                final String argName = option.getArgName();
+                if (argName != null && argName.isEmpty()) {
+                    // if the option has a blank argname
+                    optBuf.append(' ');
+                } else {
+                    optBuf.append(option.hasLongOpt() ? longOptSeparator : " ");
+                    optBuf.append("<").append(argName != null ? option.getArgName() : getArgName()).append(">");
+                }
+            }
+
+            prefixList.add(optBuf);
+            max = Math.max(optBuf.length() + maxSince, max);
+        }
+        final int nextLineTabStop = max + descPad;
+        if (showSince) {
+            final StringBuilder optHeader = new StringBuilder(HEADER_OPTIONS).append(createPadding(max - maxSince - HEADER_OPTIONS.length() + leftPad))
+                    .append(HEADER_SINCE);
+            optHeader.append(createPadding(max - optHeader.length())).append(lpad).append(HEADER_DESCRIPTION);
+            appendWrappedText(sb, width, nextLineTabStop, optHeader.toString());
+            sb.append(getNewLine());
+        }
+
+        int x = 0;
+        for (final Iterator<Option> it = optList.iterator(); it.hasNext();) {
+            final Option option = it.next();
+            final StringBuilder optBuf = new StringBuilder(prefixList.get(x++).toString());
+            if (optBuf.length() < max) {
+                optBuf.append(createPadding(max - maxSince - optBuf.length()));
+                if (showSince) {
+                    optBuf.append(lpad).append(option.getSince() == null ? "-" : option.getSince());
+                }
+                optBuf.append(createPadding(max - optBuf.length()));
+            }
+            optBuf.append(dpad);
+
+            if (deprecatedFormatFunction != null && option.isDeprecated()) {
+                optBuf.append(deprecatedFormatFunction.apply(option).trim());
+            } else if (option.getDescription() != null) {
+                optBuf.append(option.getDescription());
+            }
+            appendWrappedText(sb, width, nextLineTabStop, optBuf.toString());
+            if (it.hasNext()) {
+                sb.append(getNewLine());
+            }
+        }
+        return sb;
+    }
+```
+
+
+## 4. Rules (non-negotiable)
+
+1. **One smell, one technique.** Change only what is needed to remove smell W01 with the technique given in "The refactoring to apply". No other refactorings, renames, reformatting, comment edits or improvements anywhere else.
+2. **Behaviour must not change.** Same return values, same printed text (including spaces, line breaks and order), same exceptions and messages, same side effects. If the existing code looks wrong, keep its behaviour and note it under "Observations" in the process notes. Fixing bugs is out of scope.
+3. **The original tests are the judge, so don't touch them.** Do not modify, add, delete, skip or disable anything under `src/test/`.
+4. **Keep the public and protected API.** Do not remove, rename or change the signature, visibility or modifiers of any public or protected class, constructor, method or field. If the technique moves or renames one, keep the old one and make it delegate to the new one. New members should be `private` or package-private unless the technique needs otherwise.
+5. **Java 8, no new dependencies.** Do not edit `pom.xml` or any build file. Use only Java 8 language features and APIs (no `var`, records, switch expressions, text blocks, `List.of`, `String.isBlank`, ...).
+6. **New classes** go in package `org.apache.commons.cli` under `src/main/java`, start with the same Apache License header as the existing files, have a class Javadoc, and are package-private unless they must be public.
+7. **Keep the house style:** 4-space indentation; `final` on parameters and locals, as in the surrounding code; a short Javadoc on every new method.
+8. **Small steps.** Compile and run the tests after every step. If a step breaks a test, undo or fix that step before moving on; don't pile changes on top of a failure.
+9. **Stay in your lane.** Edit only inside your own workspace clone (`workspace/copilot-w01/commons-cli`). Don't commit, push or switch branches; `kit.py` does that. Don't open other LLMs' folders under `runs/` or `workspace/`. Don't edit the kit or the Excel files by hand, or anything in the run folder except `process.md`; `kit.py` writes them. You **are allowed** to run `python kit.py metrics --smell W01 --llm "<your LLM name>"` after your last `finish`: it measures size, cohesion and coupling before and after with CK and fills your run's row of the Excel **Metrics** sheet.
+
+
+## 5. Definition of done
+
+- `python kit.py test --llm "Copilot-W01"` shows the same number of passing tests as the original run (see `runs/copilot-w01/W01/tests_original.json`).
+- No file under `src/test/` changed, and no public or protected API was removed or changed.
+- The smell is addressed with the technique in section 2, and nothing else changed.
+- `process.md` is complete: every _italic guidance line_ has been replaced.
+- `python kit.py finish --smell W01 --llm "Copilot-W01"` has run and printed a verdict.
+
+## 6. Commands
+
+| Purpose | Command |
+|---|---|
+| Quick test (one class) | `python kit.py test --llm "Copilot-W01" --only HelpFormatterTest` |
+| Full test suite | `python kit.py test --llm "Copilot-W01"` |
+| Finish the run | `python kit.py finish --smell W01 --llm "Copilot-W01"` |

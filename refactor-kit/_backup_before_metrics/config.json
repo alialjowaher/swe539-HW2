@@ -1,0 +1,13 @@
+{
+  "repo_url": "https://github.com/apache/commons-cli.git",
+  "tag": "rel/commons-cli-1.9.0",
+  "source_root": "src/main/java/org/apache/commons/cli",
+  "smells_workbook": "smells/CommonsCLI_1.9.0_Code_Smells.xlsx",
+  "targets_file": "smells/targets.json",
+  "log_workbook": "Refactoring_Log.xlsx",
+  "maven_cmd": "mvn",
+  "maven_args": ["-B", "clean", "test", "-Drat.skip=true", "-Djacoco.skip=true"],
+  "maven_extra_args": [],
+  "test_timeout_minutes": 30,
+  "metrics": ["Size", "Cohesion", "Coupling"]
+}

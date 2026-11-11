@@ -1,0 +1,161 @@
+[
+ {
+  "status": "new",
+  "file": "src/main/java/org/apache/commons/cli/HelpFormatter.java",
+  "member": "HelpFormatter.Layout (declaration)",
+  "old": null,
+  "new": {
+   "start": 70,
+   "end": 70,
+   "text": "    private static final class Layout {"
+  }
+ },
+ {
+  "status": "new",
+  "file": "src/main/java/org/apache/commons/cli/HelpFormatter.java",
+  "member": "HelpFormatter.Layout#width",
+  "old": null,
+  "new": {
+   "start": 71,
+   "end": 71,
+   "text": "        private final int width;"
+  }
+ },
+ {
+  "status": "new",
+  "file": "src/main/java/org/apache/commons/cli/HelpFormatter.java",
+  "member": "HelpFormatter.Layout#leftPad",
+  "old": null,
+  "new": {
+   "start": 72,
+   "end": 72,
+   "text": "        private final int leftPad;"
+  }
+ },
+ {
+  "status": "new",
+  "file": "src/main/java/org/apache/commons/cli/HelpFormatter.java",
+  "member": "HelpFormatter.Layout#descPad",
+  "old": null,
+  "new": {
+   "start": 73,
+   "end": 73,
+   "text": "        private final int descPad;"
+  }
+ },
+ {
+  "status": "new",
+  "file": "src/main/java/org/apache/commons/cli/HelpFormatter.java",
+  "member": "HelpFormatter.Layout.Layout(int,int,int)",
+  "old": null,
+  "new": {
+   "start": 75,
+   "end": 79,
+   "text": "        private Layout(final int width, final int leftPad, final int descPad) {\n            this.width = width;\n            this.leftPad = leftPad;\n            this.descPad = descPad;\n        }"
+  }
+ },
+ {
+  "status": "changed",
+  "file": "src/main/java/org/apache/commons/cli/HelpFormatter.java",
+  "member": "HelpFormatter.appendOptions(A,int,Options,int,int)",
+  "old": {
+   "start": 396,
+   "end": 478,
+   "text": "    /**\n     * Renders the specified Options and return the rendered Options in a StringBuffer.\n     *\n     * @param sb The StringBuffer to place the rendered Options into.\n     * @param width The number of characters to display per line\n     * @param options The command line Options\n     * @param leftPad the number of characters of padding to be prefixed to each line\n     * @param descPad the number of characters of padding to be prefixed to each description line\n     * @return the StringBuffer with the rendered Options contents.\n     * @throws IOException if an I/O error occurs.\n     */\n    <A extends Appendable> A appendOptions(final A sb, final int width, final Options options, final int leftPad, final int descPad) throws IOException {\n        final String lpad = createPadding(leftPad);\n        final String dpad = createPadding(descPad);\n        // first create list containing only <lpad>-a,--aaa where\n        // -a is opt and --aaa is long opt; in parallel look for\n        // the longest opt string this list will be then used to\n        // sort options ascending\n        int max = 0;\n        final int maxSince = showSince ? determineMaxSinceLength(options) + leftPad : 0;\n        final List<StringBuilder> prefixList = new ArrayList<>();\n        final List<Option> optList = options.helpOptions();\n        if (getOptionComparator() != null) {\n            Collections.sort(optList, getOptionComparator());\n        }\n        for (final Option option : optList) {\n            final StringBuilder optBuf = new StringBuilder();\n            if (option.getOpt() == null) {\n                optBuf.append(lpad).append(\"   \").append(getLongOptPrefix()).append(option.getLongOpt());\n            } else {\n                optBuf.append(lpad).append(getOptPrefix()).append(option.getOpt());\n                if (option.hasLongOpt()) {\n                    optBuf.append(',').append(getLongOptPrefix()).append(option.getLongOpt());\n                }\n            }\n            if (option.hasArg()) {\n                final String argName = option.getArgName();\n                if (argName != null && argName.isEmpty()) {\n                    // if the option has a blank argname\n                    optBuf.append(' ');\n                } else {\n                    optBuf.append(option.hasLongOpt() ? longOptSeparator : \" \");\n                    optBuf.append(\"<\").append(argName != null ? option.getArgName() : getArgName()).append(\">\");\n                }\n            }\n\n            prefixList.add(optBuf);\n            max = Math.max(optBuf.length() + maxSince, max);\n        }\n        final int nextLineTabStop = max + descPad;\n        if (showSince) {\n            final StringBuilder optHeader = new StringBuilder(HEADER_OPTIONS).append(createPadding(max - maxSince - HEADER_OPTIONS.length() + leftPad))\n                    .append(HEADER_SINCE);\n            optHeader.append(createPadding(max - optHeader.length())).append(lpad).append(HEADER_DESCRIPTION);\n            appendWrappedText(sb, width, nextLineTabStop, optHeader.toString());\n            sb.append(getNewLine());\n        }\n\n        int x = 0;\n        for (final Iterator<Option> it = optList.iterator(); it.hasNext();) {\n            final Option option = it.next();\n            final StringBuilder optBuf = new StringBuilder(prefixList.get(x++).toString());\n            if (optBuf.length() < max) {\n                optBuf.append(createPadding(max - maxSince - optBuf.length()));\n                if (showSince) {\n                    optBuf.append(lpad).append(option.getSince() == null ? \"-\" : option.getSince());\n                }\n                optBuf.append(createPadding(max - optBuf.length()));\n            }\n            optBuf.append(dpad);\n\n            if (deprecatedFormatFunction != null && option.isDeprecated()) {\n                optBuf.append(deprecatedFormatFunction.apply(option).trim());\n            } else if (option.getDescription() != null) {\n                optBuf.append(option.getDescription());\n            }\n            appendWrappedText(sb, width, nextLineTabStop, optBuf.toString());\n            if (it.hasNext()) {\n                sb.append(getNewLine());\n            }\n        }\n        return sb;\n    }"
+  },
+  "new": {
+   "start": 408,
+   "end": 421,
+   "text": "    /**\n     * Renders the specified Options and return the rendered Options in a StringBuffer.\n     *\n     * @param sb The StringBuffer to place the rendered Options into.\n     * @param width The number of characters to display per line\n     * @param options The command line Options\n     * @param leftPad the number of characters of padding to be prefixed to each line\n     * @param descPad the number of characters of padding to be prefixed to each description line\n     * @return the StringBuffer with the rendered Options contents.\n     * @throws IOException if an I/O error occurs.\n     */\n    <A extends Appendable> A appendOptions(final A sb, final int width, final Options options, final int leftPad, final int descPad) throws IOException {\n        return appendOptions(sb, options, new Layout(width, leftPad, descPad));\n    }"
+  }
+ },
+ {
+  "status": "new",
+  "file": "src/main/java/org/apache/commons/cli/HelpFormatter.java",
+  "member": "HelpFormatter.appendOptions(A,Options,Layout)",
+  "old": null,
+  "new": {
+   "start": 423,
+   "end": 494,
+   "text": "    private <A extends Appendable> A appendOptions(final A sb, final Options options, final Layout layout) throws IOException {\n        final String lpad = createPadding(layout.leftPad);\n        final String dpad = createPadding(layout.descPad);\n        // first create list containing only <lpad>-a,--aaa where\n        // -a is opt and --aaa is long opt; in parallel look for\n        // the longest opt string this list will be then used to\n        // sort options ascending\n        int max = 0;\n        final int maxSince = showSince ? determineMaxSinceLength(options) + layout.leftPad : 0;\n        final List<StringBuilder> prefixList = new ArrayList<>();\n        final List<Option> optList = options.helpOptions();\n        if (getOptionComparator() != null) {\n            Collections.sort(optList, getOptionComparator());\n        }\n        for (final Option option : optList) {\n            final StringBuilder optBuf = new StringBuilder();\n            if (option.getOpt() == null) {\n                optBuf.append(lpad).append(\"   \").append(getLongOptPrefix()).append(option.getLongOpt());\n            } else {\n                optBuf.append(lpad).append(getOptPrefix()).append(option.getOpt());\n                if (option.hasLongOpt()) {\n                    optBuf.append(',').append(getLongOptPrefix()).append(option.getLongOpt());\n                }\n            }\n            if (option.hasArg()) {\n                final String argName = option.getArgName();\n                if (argName != null && argName.isEmpty()) {\n                    // if the option has a blank argname\n                    optBuf.append(' ');\n                } else {\n                    optBuf.append(option.hasLongOpt() ? longOptSeparator : \" \");\n                    optBuf.append(\"<\").append(argName != null ? option.getArgName() : getArgName()).append(\">\");\n                }\n            }\n\n            prefixList.add(optBuf);\n            max = Math.max(optBuf.length() + maxSince, max);\n        }\n        final int nextLineTabStop = max + layout.descPad;\n        if (showSince) {\n            final StringBuilder optHeader = new StringBuilder(HEADER_OPTIONS).append(createPadding(max - maxSince - HEADER_OPTIONS.length() + layout.leftPad))\n                    .append(HEADER_SINCE);\n            optHeader.append(createPadding(max - optHeader.length())).append(lpad).append(HEADER_DESCRIPTION);\n            appendWrappedText(sb, layout.width, nextLineTabStop, optHeader.toString());\n            sb.append(getNewLine());\n        }\n\n        int x = 0;\n        for (final Iterator<Option> it = optList.iterator(); it.hasNext();) {\n            final Option option = it.next();\n            final StringBuilder optBuf = new StringBuilder(prefixList.get(x++).toString());\n            if (optBuf.length() < max) {\n                optBuf.append(createPadding(max - maxSince - optBuf.length()));\n                if (showSince) {\n                    optBuf.append(lpad).append(option.getSince() == null ? \"-\" : option.getSince());\n                }\n                optBuf.append(createPadding(max - optBuf.length()));\n            }\n            optBuf.append(dpad);\n\n            if (deprecatedFormatFunction != null && option.isDeprecated()) {\n                optBuf.append(deprecatedFormatFunction.apply(option).trim());\n            } else if (option.getDescription() != null) {\n                optBuf.append(option.getDescription());\n            }\n            appendWrappedText(sb, layout.width, nextLineTabStop, optBuf.toString());\n            if (it.hasNext()) {\n                sb.append(getNewLine());\n            }\n        }\n        return sb;\n    }"
+  }
+ },
+ {
+  "status": "changed",
+  "file": "src/main/java/org/apache/commons/cli/HelpFormatter.java",
+  "member": "HelpFormatter.printHelp(PrintWriter,int,String,String,Options,int,int,String,boolean)",
+  "old": {
+   "start": 722,
+   "end": 753,
+   "text": "    /**\n     * Prints the help for {@code options} with the specified command line syntax.\n     *\n     * @param pw the writer to which the help will be written\n     * @param width the number of characters to be displayed on each line\n     * @param cmdLineSyntax the syntax for this application\n     * @param header the banner to display at the beginning of the help\n     * @param options the Options instance\n     * @param leftPad the number of characters of padding to be prefixed to each line\n     * @param descPad the number of characters of padding to be prefixed to each description line\n     * @param footer the banner to display at the end of the help\n     * @param autoUsage whether to print an automatically generated usage statement\n     * @throws IllegalStateException if there is no room to print a line\n     */\n    public void printHelp(final PrintWriter pw, final int width, final String cmdLineSyntax, final String header, final Options options, final int leftPad,\n        final int descPad, final String footer, final boolean autoUsage) {\n        if (Util.isEmpty(cmdLineSyntax)) {\n            throw new IllegalArgumentException(\"cmdLineSyntax not provided\");\n        }\n        if (autoUsage) {\n            printUsage(pw, width, cmdLineSyntax, options);\n        } else {\n            printUsage(pw, width, cmdLineSyntax);\n        }\n        if (header != null && !header.isEmpty()) {\n            printWrapped(pw, width, header);\n        }\n        printOptions(pw, width, options, leftPad, descPad);\n        if (footer != null && !footer.isEmpty()) {\n            printWrapped(pw, width, footer);\n        }\n    }"
+  },
+  "new": {
+   "start": 738,
+   "end": 755,
+   "text": "    /**\n     * Prints the help for {@code options} with the specified command line syntax.\n     *\n     * @param pw the writer to which the help will be written\n     * @param width the number of characters to be displayed on each line\n     * @param cmdLineSyntax the syntax for this application\n     * @param header the banner to display at the beginning of the help\n     * @param options the Options instance\n     * @param leftPad the number of characters of padding to be prefixed to each line\n     * @param descPad the number of characters of padding to be prefixed to each description line\n     * @param footer the banner to display at the end of the help\n     * @param autoUsage whether to print an automatically generated usage statement\n     * @throws IllegalStateException if there is no room to print a line\n     */\n    public void printHelp(final PrintWriter pw, final int width, final String cmdLineSyntax, final String header, final Options options, final int leftPad,\n        final int descPad, final String footer, final boolean autoUsage) {\n        printHelp(pw, cmdLineSyntax, header, options, footer, autoUsage, new Layout(width, leftPad, descPad));\n    }"
+  }
+ },
+ {
+  "status": "new",
+  "file": "src/main/java/org/apache/commons/cli/HelpFormatter.java",
+  "member": "HelpFormatter.printHelp(PrintWriter,String,String,Options,String,boolean,Layout)",
+  "old": null,
+  "new": {
+   "start": 757,
+   "end": 774,
+   "text": "    private void printHelp(final PrintWriter pw, final String cmdLineSyntax, final String header, final Options options, final String footer,\n        final boolean autoUsage, final Layout layout) {\n        if (Util.isEmpty(cmdLineSyntax)) {\n            throw new IllegalArgumentException(\"cmdLineSyntax not provided\");\n        }\n        if (autoUsage) {\n            printUsage(pw, layout.width, cmdLineSyntax, options);\n        } else {\n            printUsage(pw, layout.width, cmdLineSyntax);\n        }\n        if (header != null && !header.isEmpty()) {\n            printWrapped(pw, layout.width, header);\n        }\n        printOptions(pw, options, layout);\n        if (footer != null && !footer.isEmpty()) {\n            printWrapped(pw, layout.width, footer);\n        }\n    }"
+  }
+ },
+ {
+  "status": "changed",
+  "file": "src/main/java/org/apache/commons/cli/HelpFormatter.java",
+  "member": "HelpFormatter.printOptions(PrintWriter,int,Options,int,int)",
+  "old": {
+   "start": 805,
+   "end": 822,
+   "text": "    /**\n     * Prints the help for the specified Options to the specified writer, using the specified width, left padding and\n     * description padding.\n     *\n     * @param pw The printWriter to write the help to\n     * @param width The number of characters to display per line\n     * @param options The command line Options\n     * @param leftPad the number of characters of padding to be prefixed to each line\n     * @param descPad the number of characters of padding to be prefixed to each description line\n     */\n    public void printOptions(final PrintWriter pw, final int width, final Options options, final int leftPad, final int descPad) {\n        try {\n            pw.println(appendOptions(new StringBuilder(), width, options, leftPad, descPad));\n        } catch (final IOException e) {\n            // Cannot happen\n            throw new UncheckedIOException(e);\n        }\n    }"
+  },
+  "new": {
+   "start": 826,
+   "end": 838,
+   "text": "    /**\n     * Prints the help for the specified Options to the specified writer, using the specified width, left padding and\n     * description padding.\n     *\n     * @param pw The printWriter to write the help to\n     * @param width The number of characters to display per line\n     * @param options The command line Options\n     * @param leftPad the number of characters of padding to be prefixed to each line\n     * @param descPad the number of characters of padding to be prefixed to each description line\n     */\n    public void printOptions(final PrintWriter pw, final int width, final Options options, final int leftPad, final int descPad) {\n        printOptions(pw, options, new Layout(width, leftPad, descPad));\n    }"
+  }
+ },
+ {
+  "status": "new",
+  "file": "src/main/java/org/apache/commons/cli/HelpFormatter.java",
+  "member": "HelpFormatter.printOptions(PrintWriter,Options,Layout)",
+  "old": null,
+  "new": {
+   "start": 840,
+   "end": 847,
+   "text": "    private void printOptions(final PrintWriter pw, final Options options, final Layout layout) {\n        try {\n            pw.println(appendOptions(new StringBuilder(), options, layout));\n        } catch (final IOException e) {\n            // Cannot happen\n            throw new UncheckedIOException(e);\n        }\n    }"
+  }
+ },
+ {
+  "status": "changed",
+  "file": "src/main/java/org/apache/commons/cli/HelpFormatter.java",
+  "member": "HelpFormatter.renderOptions(StringBuffer,int,Options,int,int)",
+  "old": {
+   "start": 907,
+   "end": 925,
+   "text": "    /**\n     * Renders the specified Options and return the rendered Options in a StringBuffer.\n     *\n     * @param sb The StringBuffer to place the rendered Options into.\n     * @param width The number of characters to display per line\n     * @param options The command line Options\n     * @param leftPad the number of characters of padding to be prefixed to each line\n     * @param descPad the number of characters of padding to be prefixed to each description line\n     *\n     * @return the StringBuffer with the rendered Options contents.\n     */\n    protected StringBuffer renderOptions(final StringBuffer sb, final int width, final Options options, final int leftPad, final int descPad) {\n        try {\n            return appendOptions(sb, width, options, leftPad, descPad);\n        } catch (final IOException e) {\n            // Cannot happen\n            throw new UncheckedIOException(e);\n        }\n    }"
+  },
+  "new": {
+   "start": 932,
+   "end": 945,
+   "text": "    /**\n     * Renders the specified Options and return the rendered Options in a StringBuffer.\n     *\n     * @param sb The StringBuffer to place the rendered Options into.\n     * @param width The number of characters to display per line\n     * @param options The command line Options\n     * @param leftPad the number of characters of padding to be prefixed to each line\n     * @param descPad the number of characters of padding to be prefixed to each description line\n     *\n     * @return the StringBuffer with the rendered Options contents.\n     */\n    protected StringBuffer renderOptions(final StringBuffer sb, final int width, final Options options, final int leftPad, final int descPad) {\n        return renderOptions(sb, options, new Layout(width, leftPad, descPad));\n    }"
+  }
+ },
+ {
+  "status": "new",
+  "file": "src/main/java/org/apache/commons/cli/HelpFormatter.java",
+  "member": "HelpFormatter.renderOptions(StringBuffer,Options,Layout)",
+  "old": null,
+  "new": {
+   "start": 947,
+   "end": 954,
+   "text": "    private StringBuffer renderOptions(final StringBuffer sb, final Options options, final Layout layout) {\n        try {\n            return appendOptions(sb, layout.width, options, layout.leftPad, layout.descPad);\n        } catch (final IOException e) {\n            // Cannot happen\n            throw new UncheckedIOException(e);\n        }\n    }"
+  }
+ }
+]

@@ -1,0 +1,43 @@
+{
+  "smell": "W01",
+  "smell_name": "Long Method",
+  "smell_type": "Within class",
+  "classes": "HelpFormatter",
+  "member": "appendOptions(A, int, Options, int, int)",
+  "lines": "407\u2013478",
+  "technique": "Extract Method (\u00d73); Replace Temp with Query where practical",
+  "technique_source": "review sheet suggestion (column 'Suggested refactoring')",
+  "llm": "Claude",
+  "llm_slug": "claude",
+  "model": "Claude Opus 5.5 (claude-opus-5-5)",
+  "mode": "agent",
+  "base_ref": "rel/commons-cli-1.9.0",
+  "base_commit": "698b238276c0e22e97e4aec703a0b00201d29666",
+  "branch": "refactor/W01",
+  "workspace": "workspace/claude/commons-cli",
+  "started": "2026-11-10 09:47",
+  "status": "finished",
+  "finish_attempts": 1,
+  "finished": "2026-11-10 10:00",
+  "commit": "85c082a0fb8a08628d2b60d9f31bb3034956bc89",
+  "verdict": "PASS",
+  "verdict_reasons": [],
+  "files_changed": [
+    "src/main/java/org/apache/commons/cli/HelpFormatter.java (+90 -41)"
+  ],
+  "lines_added": 90,
+  "lines_removed": 41,
+  "members": {
+    "changed": 1,
+    "new": 3,
+    "removed": 0,
+    "new file": 0,
+    "deleted file": 0
+  },
+  "regressions": [],
+  "test_files_modified": [],
+  "other_files_modified": [],
+  "api_removed": [],
+  "api_added": [],
+  "process_template_lines_left": 0
+}

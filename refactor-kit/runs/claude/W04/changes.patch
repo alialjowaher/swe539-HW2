@@ -1,0 +1,127 @@
+diff --git a/src/main/java/org/apache/commons/cli/HelpFormatter.java b/src/main/java/org/apache/commons/cli/HelpFormatter.java
+index 2e86455..6cef202 100644
+--- a/src/main/java/org/apache/commons/cli/HelpFormatter.java
++++ b/src/main/java/org/apache/commons/cli/HelpFormatter.java
+@@ -735,20 +735,37 @@ public class HelpFormatter {
+      */
+     public void printHelp(final PrintWriter pw, final int width, final String cmdLineSyntax, final String header, final Options options, final int leftPad,
+         final int descPad, final String footer, final boolean autoUsage) {
++        printHelp(pw, new HelpLayout(width, leftPad, descPad), cmdLineSyntax, header, options, footer, autoUsage);
++    }
++
++    /**
++     * Prints the help for {@code options} with the specified command line syntax, using the given page layout.
++     *
++     * @param pw the writer to which the help will be written
++     * @param layout the line width, left padding and description padding to use
++     * @param cmdLineSyntax the syntax for this application
++     * @param header the banner to display at the beginning of the help
++     * @param options the Options instance
++     * @param footer the banner to display at the end of the help
++     * @param autoUsage whether to print an automatically generated usage statement
++     * @throws IllegalStateException if there is no room to print a line
++     */
++    private void printHelp(final PrintWriter pw, final HelpLayout layout, final String cmdLineSyntax, final String header, final Options options,
++        final String footer, final boolean autoUsage) {
+         if (Util.isEmpty(cmdLineSyntax)) {
+             throw new IllegalArgumentException("cmdLineSyntax not provided");
+         }
+         if (autoUsage) {
+-            printUsage(pw, width, cmdLineSyntax, options);
++            printUsage(pw, layout.getWidth(), cmdLineSyntax, options);
+         } else {
+-            printUsage(pw, width, cmdLineSyntax);
++            printUsage(pw, layout.getWidth(), cmdLineSyntax);
+         }
+         if (header != null && !header.isEmpty()) {
+-            printWrapped(pw, width, header);
++            printWrapped(pw, layout.getWidth(), header);
+         }
+-        printOptions(pw, width, options, leftPad, descPad);
++        printOptions(pw, layout.getWidth(), options, layout.getLeftPad(), layout.getDescPad());
+         if (footer != null && !footer.isEmpty()) {
+-            printWrapped(pw, width, footer);
++            printWrapped(pw, layout.getWidth(), footer);
+         }
+     }
+ 
+diff --git a/src/main/java/org/apache/commons/cli/HelpLayout.java b/src/main/java/org/apache/commons/cli/HelpLayout.java
+new file mode 100644
+index 0000000..0de6e96
+--- /dev/null
++++ b/src/main/java/org/apache/commons/cli/HelpLayout.java
+@@ -0,0 +1,74 @@
++/*
++  Licensed to the Apache Software Foundation (ASF) under one or more
++  contributor license agreements.  See the NOTICE file distributed with
++  this work for additional information regarding copyright ownership.
++  The ASF licenses this file to You under the Apache License, Version 2.0
++  (the "License"); you may not use this file except in compliance with
++  the License.  You may obtain a copy of the License at
++
++      http://www.apache.org/licenses/LICENSE-2.0
++
++  Unless required by applicable law or agreed to in writing, software
++  distributed under the License is distributed on an "AS IS" BASIS,
++  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++  See the License for the specific language governing permissions and
++  limitations under the License.
++ */
++
++package org.apache.commons.cli;
++
++/**
++ * Package-private, immutable layout of a help page: the line width, the left padding and the description padding used by
++ * {@link HelpFormatter} when it prints help.
++ */
++final class HelpLayout {
++
++    /** The number of characters to be displayed on each line. */
++    private final int width;
++
++    /** The number of characters of padding to be prefixed to each line. */
++    private final int leftPad;
++
++    /** The number of characters of padding to be prefixed to each description line. */
++    private final int descPad;
++
++    /**
++     * Constructs a new layout.
++     *
++     * @param width the number of characters to be displayed on each line
++     * @param leftPad the number of characters of padding to be prefixed to each line
++     * @param descPad the number of characters of padding to be prefixed to each description line
++     */
++    HelpLayout(final int width, final int leftPad, final int descPad) {
++        this.width = width;
++        this.leftPad = leftPad;
++        this.descPad = descPad;
++    }
++
++    /**
++     * Gets the number of characters of padding to be prefixed to each description line.
++     *
++     * @return the description padding
++     */
++    int getDescPad() {
++        return descPad;
++    }
++
++    /**
++     * Gets the number of characters of padding to be prefixed to each line.
++     *
++     * @return the left padding
++     */
++    int getLeftPad() {
++        return leftPad;
++    }
++
++    /**
++     * Gets the number of characters to be displayed on each line.
++     *
++     * @return the line width
++     */
++    int getWidth() {
++        return width;
++    }
++}

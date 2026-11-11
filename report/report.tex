@@ -1,0 +1,204 @@
+% SWE 539 HW2 - LLM refactoring comparison. Build: ./build.sh  (numbers/tables/figures come from make_report.py)
+\documentclass[10pt,a4paper]{article}
+\usepackage[a4paper,margin=1.8cm,top=1.6cm,bottom=1.7cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage[font=small,labelfont=bf,skip=3pt]{caption}
+\usepackage[hidelinks]{hyperref}
+
+% every number in the prose comes from generated/numbers.tex; an unknown key prints a red ?? and warns
+\makeatletter
+\input{generated/numbers.tex}
+\newcommand{\val}[1]{\ifcsname val@#1\endcsname\csname val@#1\endcsname\else
+  \textbf{\textcolor{red}{??}}\PackageWarning{report}{Undefined value #1}\fi}
+\renewcommand\section{\@startsection{section}{1}{\z@}{-1.6ex plus -.4ex minus -.2ex}{0.7ex}{\normalfont\large\bfseries}}
+\renewcommand\paragraph{\@startsection{paragraph}{4}{\z@}{0.9ex plus .2ex}{-0.8em}{\normalfont\normalsize\bfseries}}
+\makeatother
+\newcommand{\code}[1]{\texttt{#1}}
+\setlength{\emergencystretch}{3em}
+\setlength{\textfloatsep}{9pt plus 2pt minus 2pt}
+\setlength{\floatsep}{8pt plus 2pt minus 2pt}
+\setlength{\intextsep}{8pt plus 2pt minus 2pt}
+\newenvironment{tightlist}{\begin{itemize}\setlength{\itemsep}{1pt}\setlength{\parskip}{0pt}\setlength{\topsep}{2pt}}{\end{itemize}}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries Three LLM agents, one refactoring kit:\\[1pt] four code smells in Apache Commons CLI 1.9.0}\\[4pt]
+{\small SWE~539 Homework~2 \quad$\cdot$\quad Ali Aljowaher \quad$\cdot$\quad November 2026}
+\end{center}
+
+\section{Setup}
+We asked three LLM coding agents to remove the same four code smells from Apache Commons CLI 1.9.0
+(tag \code{rel/commons-cli-1.9.0}, commit \code{\val{base.commit}}): two within-class smells (W01, W04) and two
+between-class smells (B01, B02), each with the refactoring technique fixed in advance by the reviewed smell sheet
+(Table~\ref{tab:smells}). A starter kit (\code{kit.py}) did every mechanical step in the same way for every run.
+It cloned the tag onto a fresh branch, saved the original code and ran the project's own test suite on the untouched code
+(\val{tests.total} JUnit tests: \val{tests.pass} pass, \val{tests.skip} skipped, \val{tests.fail} fail).
+After the agent's edits it re-ran the same, unmodified suite, compared the public and protected API, committed the result,
+logged everything to one Excel workbook and measured both versions with CK. The agent only had to plan, refactor in small
+tested steps and document its process. The protocol gave every run the same unified prompt, with only the smell ID, LLM
+name and model filled in, plus the same task file, the same rules and the same repair budget of at most three
+\code{finish} attempts (Table~\ref{tab:setup}). The deviations from this protocol are listed in Section~\ref{sec:threats}.
+
+\begin{table}[h]
+\centering\small
+\caption{Experimental setup.}\label{tab:setup}
+\begin{tabularx}{\linewidth}{@{}>{\bfseries}l X@{}}
+\toprule
+Subject & Apache Commons CLI 1.9.0, \code{src/main/java}; one fresh branch per smell and LLM, all starting from the release tag \\
+Oracle & Original JUnit suite, \val{tests.total} tests (\val{tests.pass} pass, \val{tests.skip} skipped); the baseline is run once per commit and reused \\
+Verdict & PASS = compiles, 0 regressions, no test file changed, no public/protected API removed, code actually changed \\
+Metrics & CK \val{ck} on the whole tree, summarised over the classes of the affected files: Size = LOC (sum),
+          Cohesion = LCOM* (mean; 0 = cohesive, 1 = no cohesion), Coupling = CBO (sum) \\
+Toolchain & OpenJDK 17.0.21, Maven 3.9.6, Git 2.39.5, Python 3.11 (\code{kit.py}, openpyxl) \\
+LLM agents & \textbf{Claude Opus 5.5} (\code{claude-opus-5-5}, Claude Code CLI) $\cdot$
+             \textbf{Gemini 3.1 Pro} (agent tool not recorded) $\cdot$
+             \textbf{Copilot}, recorded as ``Copilot SDK in VS Code (2026-11-10)'' (underlying model not recorded);
+             all in agent mode, running the kit's commands themselves \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{table}[h]
+\centering\small
+\caption{The four smells and the refactoring every LLM had to apply.}\label{tab:smells}
+\input{generated/smells.tex}
+\end{table}
+
+\section{Results}
+All \val{runs} runs ended with verdict PASS (\val{runs.pass} of \val{runs}). Each compiled, kept the \val{tests.pass}
+originally passing tests green with \val{runs.regr} regressions in total, left the test files untouched and removed no
+public or protected API element (Table~\ref{tab:results}). Every run passed at its first \code{finish}, and
+\val{runs.att1} of the \val{runs} used only that one attempt. Claude's W04 ran \code{finish} a second time, only to
+complete its \code{process.md}; no code changed. Correctness therefore does not separate the three LLMs. The differences
+lie in how far each agent carried the prescribed technique (Fig.~\ref{fig:changes}) and in what the metrics then report
+(Fig.~\ref{fig:cohesion}).
+
+\begin{table}[t]
+\centering\footnotesize\setlength{\tabcolsep}{3.4pt}
+\caption{All twelve runs; the verdict is PASS in every row. Tests = the original suite on the refactored code (the same
+\val{tests.skip} tests are skipped on the original code). Att.\ = \code{finish} attempts. Diff lines include the license header and Javadoc of new files.
+Members = methods, fields and declarations changed / new / removed. Metrics are CK values before $\to$ after.}\label{tab:results}
+\input{generated/results.tex}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_changes.pdf}
+\caption{(a) Diff lines per run. New files count in full, so most of Claude's W04 +\val{W04.Claude.add} is the new
+\code{HelpLayout} file, whereas Copilot's +\val{W04.Copilot.add} adds \val{W04.Copilot.mnew} members.
+(b) Cyclomatic complexity (CK) of the smell's target methods: grey tick = original, markers = after each LLM's refactoring.
+Rows where a method's body moved into another member are left out (Copilot's W04 \code{appendOptions}, B02's
+\code{updateRequiredOptions}).}\label{fig:changes}
+\end{figure}
+
+\section{Differences between the LLMs}
+\paragraph{W01 Long Method.} The three refactorings are practically identical. The task names the three helpers to extract
+(\code{buildOptionLabel}, \code{appendSinceHeader}, \code{appendOptionRow}), and every agent used exactly those names.
+\code{appendOptions} shrank from \val{W01.Claude.m.HelpFormatter.appendOptions/5.loc.b} to
+\val{W01.Claude.m.HelpFormatter.appendOptions/5.loc.a} LOC (complexity \val{W01.Claude.m.HelpFormatter.appendOptions/5.cc.b}
+$\to$ \val{W01.Claude.m.HelpFormatter.appendOptions/5.cc.a}) in all three runs, and the class-level CK numbers coincide.
+The runs differ only in the helpers' parameter lists (Gemini and Copilot pass a \code{StringBuilder}, Claude a
+\code{String}) and by three diff lines.
+
+\paragraph{W04 Long Parameter List.} All three introduced a three-field layout object (width, left pad, description pad) and
+turned the public 9-parameter \code{printHelp} into a one-line delegate (complexity
+\val{W04.Claude.m.HelpFormatter.printHelp/9.cc.b} $\to$ \val{W04.Claude.m.HelpFormatter.printHelp/9.cc.a}), keeping every
+public overload. They differ in scope. Claude routed only \code{printHelp} through a new top-level, package-private class
+\code{HelpLayout} (\val{W04.Claude.mnew} new member). Gemini built the same class and also added a private
+\code{printOptions} overload that takes it. Copilot used a nested \code{HelpFormatter.Layout} and added
+\code{Layout}-taking overloads of \code{printOptions}, \code{renderOptions} and \code{appendOptions}, moving the
+\val{W04.Copilot.m.HelpFormatter.appendOptions/3.loc.a}-line body of \code{appendOptions} into the new overload
+(\val{W04.Copilot.mnew} new members). In every run \code{HelpFormatter} itself became marginally less cohesive (LCOM*
+\val{W04.Claude.c.HelpFormatter.lcom.b} $\to$ \val{W04.Claude.c.HelpFormatter.lcom.a} / \val{W04.Gemini.c.HelpFormatter.lcom.a}
+/ \val{W04.Copilot.c.HelpFormatter.lcom.a} for Claude / Gemini / Copilot) and gained one dependency (CBO
+\val{W04.Claude.c.HelpFormatter.cbo.b} $\to$ \val{W04.Claude.c.HelpFormatter.cbo.a}).
+
+\paragraph{B01 Feature Envy.} All three moved description and label logic from \code{HelpFormatter} into \code{Option}
+(\code{getDescriptionOrEmpty} plus label builders) and shortened \code{OptionGroup.toString}
+(\val{B01.Claude.m.OptionGroup.toString/0.loc.b} $\to$ \val{B01.Claude.m.OptionGroup.toString/0.loc.a} LOC).
+Claude and Gemini moved \val{B01.Claude.mnew} methods each and cut \code{HelpFormatter} from
+\val{B01.Claude.c.HelpFormatter.loc.b} to \val{B01.Claude.c.HelpFormatter.loc.a} and \val{B01.Gemini.c.HelpFormatter.loc.a} LOC.
+\code{appendOption}'s complexity fell from \val{B01.Claude.m.HelpFormatter.appendOption/3.cc.b} to
+\val{B01.Claude.m.HelpFormatter.appendOption/3.cc.a}, and \code{appendOptions}' from
+\val{B01.Claude.m.HelpFormatter.appendOptions/5.cc.b} to \val{B01.Claude.m.HelpFormatter.appendOptions/5.cc.a} (Claude) or
+\val{B01.Gemini.m.HelpFormatter.appendOptions/5.cc.a} (Gemini). Copilot moved only \val{B01.Copilot.mnew}:
+\code{HelpFormatter} shrank only to \val{B01.Copilot.c.HelpFormatter.loc.a} LOC, \code{appendOption} kept complexity
+\val{B01.Copilot.m.HelpFormatter.appendOption/3.cc.a} and \code{appendOptions} went to
+\val{B01.Copilot.m.HelpFormatter.appendOptions/5.cc.a}. \code{Option} absorbed the moved code
+(\val{B01.Claude.c.Option.loc.d} / \val{B01.Gemini.c.Option.loc.d} / \val{B01.Copilot.c.Option.loc.d} LOC); coupling
+did not change in any run.
+
+\paragraph{B02 Shotgun Surgery.} All three extracted a package-private \code{RequiredOptions} class (the name the task
+suggests) that owns the per-parse list of still-missing required options, and kept the public and protected API by
+delegating to it. Claude went furthest. It deleted both private \code{updateRequiredOptions} clones
+(\val{B02.Claude.mrem} removed members) and moved their logic into \code{RequiredOptions.markSeen}, whereas Gemini and Copilot kept
+them as thin delegates. Copilot also changed the required-option bookkeeping in \code{Options} (CBO
+\val{B02.Copilot.c.Options.cbo.b} $\to$ \val{B02.Copilot.c.Options.cbo.a}) and wrote a larger tracker
+(\val{B02.Copilot.c.RequiredOptions.loc.a} LOC against \val{B02.Claude.c.RequiredOptions.loc.a}). \code{Parser}'s cohesion
+improved most in Claude's run (LCOM* \val{B02.Claude.c.Parser.lcom.b} $\to$ \val{B02.Claude.c.Parser.lcom.a}), less in Gemini's
+(\val{B02.Gemini.c.Parser.lcom.a}), and got worse in Copilot's (\val{B02.Copilot.c.Parser.lcom.a}).
+\code{DefaultParser} got slightly worse in all three (\val{B02.Claude.c.DefaultParser.lcom.b} $\to$
+\val{B02.Claude.c.DefaultParser.lcom.a} / \val{B02.Gemini.c.DefaultParser.lcom.a} / \val{B02.Copilot.c.DefaultParser.lcom.a}).
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_cohesion.pdf}
+\caption{(a) The Cohesion value the kit reports: mean LCOM* over the counted classes, including the classes a refactoring
+creates. (b) The same metric for the main pre-existing classes. The new classes are \code{HelpLayout} (LCOM*
+\val{W04.Claude.c.HelpLayout.lcom.a}; Claude, Gemini), \code{HelpFormatter.Layout}
+(\val{W04.Copilot.c.HelpFormatter.Layout.lcom.a}; Copilot) and \code{RequiredOptions}
+(\val{B02.Claude.c.RequiredOptions.lcom.a} Claude, \val{B02.Gemini.c.RequiredOptions.lcom.a} Gemini,
+\val{B02.Copilot.c.RequiredOptions.lcom.a} Copilot).}\label{fig:cohesion}
+\end{figure}
+
+\paragraph{What the metrics say.} The large cohesion gains are mostly an artefact of averaging (Fig.~\ref{fig:cohesion}).
+Because the reported value is a mean over the counted classes, adding one small, cohesive class pulls it down even when no
+existing class improves. Copilot's W04 mean falls from \val{W04.Copilot.coh.b} to \val{W04.Copilot.coh.a}, yet
+\code{HelpFormatter}'s own LCOM* rose slightly in every W04 run. The only clear cohesion improvement of an existing
+class is \code{Parser} in Claude's and Gemini's B02. Coupling rises by \val{W04.Claude.cbo.d} in W04 because
+\code{HelpFormatter} now depends on the layout class (the layout classes themselves have CBO
+\val{W04.Claude.c.HelpLayout.cbo.a}). It rises by \val{B02.Claude.cbo.d} in B02 because the new tracker is counted (CBO
+\val{B02.Claude.c.RequiredOptions.cbo.a}, Copilot \val{B02.Copilot.c.RequiredOptions.cbo.a}), while each existing parser
+lost one dependency (\code{Parser} CBO \val{B02.Claude.c.Parser.cbo.b} $\to$ \val{B02.Claude.c.Parser.cbo.a}). Size changes are small (between \val{B02.Claude.size.d} and \val{W04.Copilot.size.d}
+LOC). Per-class and per-method values (\code{metrics.md} in each run folder) are therefore the right basis for comparing
+the LLMs, not the three headline numbers.
+
+\section{Threats to validity}\label{sec:threats}
+\begin{tightlist}
+\item \textbf{Model identity.} Copilot's underlying model and Gemini's agent tool were not recorded. Copilot's four runs
+  were logged under three LLM names (\code{Copilot}, \code{Copilot-W01}, \code{Copilot-B01}) and are merged here. Its W04
+  and B02 ran concurrently in two separate clones.
+\item \textbf{Session hygiene.} Claude's W01 and B01 ran back to back in one session that was told to read the README and
+  prompt files, rather than in fresh sessions with the filled-in prompt pasted. The metrics step was added to the kit after
+  those two runs, and their CK values were measured afterwards with the same command. Claude's W04 and B02 ran as fresh
+  sub-agents launched from an operator's Claude Code session, with the unmodified prompt.
+  All runs shared one kit folder, so earlier runs' outputs were readable by later agents. Gemini's W04 and B02 ran after
+  Claude's and produced classes with identical CK profiles (\code{HelpLayout}: \val{W04.Gemini.c.HelpLayout.loc.a} LOC,
+  WMC \val{W04.Gemini.c.HelpLayout.wmc.a}; \code{RequiredOptions}: \val{B02.Gemini.c.RequiredOptions.loc.a} LOC, WMC
+  \val{B02.Gemini.c.RequiredOptions.wmc.a}, CBO \val{B02.Gemini.c.RequiredOptions.cbo.a}). Convergence under a prescriptive
+  task is plausible, but reuse cannot be ruled out.
+\item \textbf{Prescriptive task.} The smell sheet names the helpers and classes for W01, B01 and B02, which limits how
+  different the solutions can be.
+\item \textbf{Oracle and sample.} PASS means the existing suite (\val{tests.skip} tests skipped) saw no change in behaviour,
+  not that the smell is gone. Each smell was run once per LLM, so LLM nondeterminism is not measured. Wall-clock times include
+  human approval waits and are not compared.
+\end{tightlist}
+
+\section{Conclusion}
+All three agents delivered behaviour-preserving refactorings for all four smells at the first attempt, so correctness did
+not distinguish them. They differed in scope. Claude and Gemini made nearly the same choices, with Claude the more minimal
+in W04 and the more thorough in B02. Copilot was the most conservative in B01 (complexity of \code{appendOption}
+unchanged) and the most expansive in W04 (\val{W04.Copilot.mnew} new members). Existing classes changed little in
+cohesion and coupling. The big drops in the headline Cohesion value come from averaging in new classes, so any judgement
+of ``better code'' should rest on the per-class numbers and on reading the diffs.
+
+\end{document}

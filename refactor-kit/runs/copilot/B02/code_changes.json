@@ -1,0 +1,185 @@
+[
+ {
+  "status": "new",
+  "file": "src/main/java/org/apache/commons/cli/DefaultParser.java",
+  "member": "DefaultParser#requiredOptions",
+  "old": null,
+  "new": {
+   "start": 181,
+   "end": 182,
+   "text": "    /** Tracks required options during parsing. */\n    private RequiredOptions requiredOptions;"
+  }
+ },
+ {
+  "status": "changed",
+  "file": "src/main/java/org/apache/commons/cli/DefaultParser.java",
+  "member": "DefaultParser.checkRequiredOptions()",
+  "old": {
+   "start": 273,
+   "end": 283,
+   "text": "    /**\n     * Throws a {@link MissingOptionException} if all of the required options are not present.\n     *\n     * @throws MissingOptionException if any of the required Options are not present.\n     */\n    protected void checkRequiredOptions() throws MissingOptionException {\n        // if there are required options that have not been processed\n        if (!expectedOpts.isEmpty()) {\n            throw new MissingOptionException(expectedOpts);\n        }\n    }"
+  },
+  "new": {
+   "start": 276,
+   "end": 283,
+   "text": "    /**\n     * Throws a {@link MissingOptionException} if all of the required options are not present.\n     *\n     * @throws MissingOptionException if any of the required Options are not present.\n     */\n    protected void checkRequiredOptions() throws MissingOptionException {\n        requiredOptions.checkAllPresent();\n    }"
+  }
+ },
+ {
+  "status": "changed",
+  "file": "src/main/java/org/apache/commons/cli/DefaultParser.java",
+  "member": "DefaultParser.parse(Options,String[],Properties,boolean)",
+  "old": {
+   "start": 689,
+   "end": 725,
+   "text": "    /**\n     * Parses the arguments according to the specified options and properties.\n     *\n     * @param options the specified Options\n     * @param arguments the command line arguments\n     * @param properties command line option name-value pairs\n     * @param stopAtNonOption if {@code true} an unrecognized argument stops the parsing and the remaining arguments\n     *        are added to the {@link CommandLine}s args list. If {@code false} an unrecognized argument triggers a\n     *        ParseException.\n     *\n     * @return the list of atomic option and value tokens\n     * @throws ParseException if there are any problems encountered while parsing the command line tokens.\n     */\n    public CommandLine parse(final Options options, final String[] arguments, final Properties properties, final boolean stopAtNonOption)\n        throws ParseException {\n        this.options = options;\n        this.stopAtNonOption = stopAtNonOption;\n        skipParsing = false;\n        currentOption = null;\n        expectedOpts = new ArrayList<>(options.getRequiredOptions());\n        // clear the data from the groups\n        for (final OptionGroup group : options.getOptionGroups()) {\n            group.setSelected(null);\n        }\n        cmd = CommandLine.builder().setDeprecatedHandler(deprecatedHandler).build();\n        if (arguments != null) {\n            for (final String argument : arguments) {\n                handleToken(argument);\n            }\n        }\n        // check the arguments of the last option\n        checkRequiredArgs();\n        // add the default options\n        handleProperties(properties);\n        checkRequiredOptions();\n        return cmd;\n    }"
+  },
+  "new": {
+   "start": 689,
+   "end": 726,
+   "text": "    /**\n     * Parses the arguments according to the specified options and properties.\n     *\n     * @param options the specified Options\n     * @param arguments the command line arguments\n     * @param properties command line option name-value pairs\n     * @param stopAtNonOption if {@code true} an unrecognized argument stops the parsing and the remaining arguments\n     *        are added to the {@link CommandLine}s args list. If {@code false} an unrecognized argument triggers a\n     *        ParseException.\n     *\n     * @return the list of atomic option and value tokens\n     * @throws ParseException if there are any problems encountered while parsing the command line tokens.\n     */\n    public CommandLine parse(final Options options, final String[] arguments, final Properties properties, final boolean stopAtNonOption)\n        throws ParseException {\n        this.options = options;\n        this.stopAtNonOption = stopAtNonOption;\n        skipParsing = false;\n        currentOption = null;\n        requiredOptions = new RequiredOptions(options.getRequiredOptions());\n        expectedOpts = requiredOptions.getOptions();\n        // clear the data from the groups\n        for (final OptionGroup group : options.getOptionGroups()) {\n            group.setSelected(null);\n        }\n        cmd = CommandLine.builder().setDeprecatedHandler(deprecatedHandler).build();\n        if (arguments != null) {\n            for (final String argument : arguments) {\n                handleToken(argument);\n            }\n        }\n        // check the arguments of the last option\n        checkRequiredArgs();\n        // add the default options\n        handleProperties(properties);\n        checkRequiredOptions();\n        return cmd;\n    }"
+  }
+ },
+ {
+  "status": "changed",
+  "file": "src/main/java/org/apache/commons/cli/DefaultParser.java",
+  "member": "DefaultParser.updateRequiredOptions(Option)",
+  "old": {
+   "start": 755,
+   "end": 775,
+   "text": "    /**\n     * Removes the option or its group from the list of expected elements.\n     *\n     * @param option\n     */\n    private void updateRequiredOptions(final Option option) throws AlreadySelectedException {\n        if (option.isRequired()) {\n            expectedOpts.remove(option.getKey());\n        }\n\n        // if the option is in an OptionGroup make that option the selected option of the group\n        if (options.getOptionGroup(option) != null) {\n            final OptionGroup group = options.getOptionGroup(option);\n\n            if (group.isRequired()) {\n                expectedOpts.remove(group);\n            }\n\n            group.setSelected(option);\n        }\n    }"
+  },
+  "new": {
+   "start": 756,
+   "end": 763,
+   "text": "    /**\n     * Removes the option or its group from the list of expected elements.\n     *\n     * @param option\n     */\n    private void updateRequiredOptions(final Option option) throws AlreadySelectedException {\n        requiredOptions.markSeen(option, options.getOptionGroup(option));\n    }"
+  }
+ },
+ {
+  "status": "changed",
+  "file": "src/main/java/org/apache/commons/cli/Options.java",
+  "member": "Options#requiredOpts",
+  "old": {
+   "start": 51,
+   "end": 54,
+   "text": "    /** A map of the required options */\n    // N.B. This can contain either a String (addOption) or an OptionGroup (addOptionGroup)\n    // TODO this seems wrong\n    private final List<Object> requiredOpts = new ArrayList<>();"
+  },
+  "new": {
+   "start": 51,
+   "end": 52,
+   "text": "    /** The required options. */\n    private final RequiredOptions requiredOpts = new RequiredOptions();"
+  }
+ },
+ {
+  "status": "changed",
+  "file": "src/main/java/org/apache/commons/cli/Options.java",
+  "member": "Options.addOption(Option)",
+  "old": {
+   "start": 59,
+   "end": 80,
+   "text": "    /**\n     * Adds an option instance\n     *\n     * @param opt the option that is to be added\n     * @return the resulting Options instance\n     */\n    public Options addOption(final Option opt) {\n        final String key = opt.getKey();\n        // add it to the long option list\n        if (opt.hasLongOpt()) {\n            longOpts.put(opt.getLongOpt(), opt);\n        }\n        // if the option is required add it to the required list\n        if (opt.isRequired()) {\n            if (requiredOpts.contains(key)) {\n                requiredOpts.remove(requiredOpts.indexOf(key));\n            }\n            requiredOpts.add(key);\n        }\n        shortOpts.put(key, opt);\n        return this;\n    }"
+  },
+  "new": {
+   "start": 57,
+   "end": 75,
+   "text": "    /**\n     * Adds an option instance\n     *\n     * @param opt the option that is to be added\n     * @return the resulting Options instance\n     */\n    public Options addOption(final Option opt) {\n        final String key = opt.getKey();\n        // add it to the long option list\n        if (opt.hasLongOpt()) {\n            longOpts.put(opt.getLongOpt(), opt);\n        }\n        // if the option is required add it to the required list\n        if (opt.isRequired()) {\n            requiredOpts.addOption(key);\n        }\n        shortOpts.put(key, opt);\n        return this;\n    }"
+  }
+ },
+ {
+  "status": "changed",
+  "file": "src/main/java/org/apache/commons/cli/Options.java",
+  "member": "Options.addOptionGroup(OptionGroup)",
+  "old": {
+   "start": 131,
+   "end": 150,
+   "text": "    /**\n     * Adds the specified option group.\n     *\n     * @param group the OptionGroup that is to be added\n     * @return the resulting Options instance\n     */\n    public Options addOptionGroup(final OptionGroup group) {\n        if (group.isRequired()) {\n            requiredOpts.add(group);\n        }\n        for (final Option option : group.getOptions()) {\n            // an Option cannot be required if it is in an\n            // OptionGroup, either the group is required or\n            // nothing is required\n            option.setRequired(false);\n            addOption(option);\n            optionGroups.put(option.getKey(), group);\n        }\n        return this;\n    }"
+  },
+  "new": {
+   "start": 126,
+   "end": 145,
+   "text": "    /**\n     * Adds the specified option group.\n     *\n     * @param group the OptionGroup that is to be added\n     * @return the resulting Options instance\n     */\n    public Options addOptionGroup(final OptionGroup group) {\n        if (group.isRequired()) {\n            requiredOpts.addGroup(group);\n        }\n        for (final Option option : group.getOptions()) {\n            // an Option cannot be required if it is in an\n            // OptionGroup, either the group is required or\n            // nothing is required\n            option.setRequired(false);\n            addOption(option);\n            optionGroups.put(option.getKey(), group);\n        }\n        return this;\n    }"
+  }
+ },
+ {
+  "status": "changed",
+  "file": "src/main/java/org/apache/commons/cli/Options.java",
+  "member": "Options.getRequiredOptions()",
+  "old": {
+   "start": 268,
+   "end": 275,
+   "text": "    /**\n     * Gets the required options.\n     *\n     * @return read-only List of required options\n     */\n    public List<?> getRequiredOptions() {\n        return Collections.unmodifiableList(requiredOpts);\n    }"
+  },
+  "new": {
+   "start": 263,
+   "end": 270,
+   "text": "    /**\n     * Gets the required options.\n     *\n     * @return read-only List of required options\n     */\n    public List<?> getRequiredOptions() {\n        return Collections.unmodifiableList(requiredOpts.getOptions());\n    }"
+  }
+ },
+ {
+  "status": "new",
+  "file": "src/main/java/org/apache/commons/cli/Parser.java",
+  "member": "Parser#requiredOptionsTracker",
+  "old": null,
+  "new": {
+   "start": 43,
+   "end": 44,
+   "text": "    /** Tracks required options during parsing. */\n    private RequiredOptions requiredOptionsTracker;"
+  }
+ },
+ {
+  "status": "changed",
+  "file": "src/main/java/org/apache/commons/cli/Parser.java",
+  "member": "Parser.checkRequiredOptions()",
+  "old": {
+   "start": 43,
+   "end": 53,
+   "text": "    /**\n     * Throws a {@link MissingOptionException} if all of the required options are not present.\n     *\n     * @throws MissingOptionException if any of the required Options are not present.\n     */\n    protected void checkRequiredOptions() throws MissingOptionException {\n        // if there are required options that have not been processed\n        if (!getRequiredOptions().isEmpty()) {\n            throw new MissingOptionException(getRequiredOptions());\n        }\n    }"
+  },
+  "new": {
+   "start": 46,
+   "end": 53,
+   "text": "    /**\n     * Throws a {@link MissingOptionException} if all of the required options are not present.\n     *\n     * @throws MissingOptionException if any of the required Options are not present.\n     */\n    protected void checkRequiredOptions() throws MissingOptionException {\n        requiredOptionsTracker.checkAllPresent();\n    }"
+  }
+ },
+ {
+  "status": "changed",
+  "file": "src/main/java/org/apache/commons/cli/Parser.java",
+  "member": "Parser.setOptions(Options)",
+  "old": {
+   "start": 299,
+   "end": 307,
+   "text": "    /**\n     * Sets the options.\n     *\n     * @param options the options.\n     */\n    protected void setOptions(final Options options) {\n        this.options = options;\n        this.requiredOptions = new ArrayList<>(options.getRequiredOptions());\n    }"
+  },
+  "new": {
+   "start": 299,
+   "end": 308,
+   "text": "    /**\n     * Sets the options.\n     *\n     * @param options the options.\n     */\n    protected void setOptions(final Options options) {\n        this.options = options;\n        requiredOptionsTracker = new RequiredOptions(options.getRequiredOptions());\n        this.requiredOptions = requiredOptionsTracker.getOptions();\n    }"
+  }
+ },
+ {
+  "status": "changed",
+  "file": "src/main/java/org/apache/commons/cli/Parser.java",
+  "member": "Parser.updateRequiredOptions(Option)",
+  "old": {
+   "start": 309,
+   "end": 329,
+   "text": "    /**\n     * Removes the option or its group from the list of expected elements.\n     *\n     * @param opt\n     */\n    private void updateRequiredOptions(final Option opt) throws ParseException {\n        // if the option is a required option remove the option from\n        // the requiredOptions list\n        if (opt.isRequired()) {\n            getRequiredOptions().remove(opt.getKey());\n        }\n        // if the option is in an OptionGroup make that option the selected\n        // option of the group\n        if (getOptions().getOptionGroup(opt) != null) {\n            final OptionGroup group = getOptions().getOptionGroup(opt);\n            if (group.isRequired()) {\n                getRequiredOptions().remove(group);\n            }\n            group.setSelected(opt);\n        }\n    }"
+  },
+  "new": {
+   "start": 310,
+   "end": 317,
+   "text": "    /**\n     * Removes the option or its group from the list of expected elements.\n     *\n     * @param opt\n     */\n    private void updateRequiredOptions(final Option opt) throws ParseException {\n        requiredOptionsTracker.markSeen(opt, getOptions().getOptionGroup(opt));\n    }"
+  }
+ },
+ {
+  "status": "new file",
+  "file": "src/main/java/org/apache/commons/cli/RequiredOptions.java",
+  "member": "(whole file)",
+  "old": null,
+  "new": {
+   "start": 1,
+   "end": 79,
+   "text": "/*\n  Licensed to the Apache Software Foundation (ASF) under one or more\n  contributor license agreements.  See the NOTICE file distributed with\n  this work for additional information regarding copyright ownership.\n  The ASF licenses this file to You under the Apache License, Version 2.0\n  (the \"License\"); you may not use this file except in compliance with\n  the License.  You may obtain a copy of the License at\n\n      http://www.apache.org/licenses/LICENSE-2.0\n\n  Unless required by applicable law or agreed to in writing, software\n  distributed under the License is distributed on an \"AS IS\" BASIS,\n  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n  See the License for the specific language governing permissions and\n  limitations under the License.\n */\n\npackage org.apache.commons.cli;\n\nimport java.io.Serializable;\nimport java.util.ArrayList;\nimport java.util.Collection;\nimport java.util.List;\n\n/** Tracks required options and option groups during parsing. */\nfinal class RequiredOptions implements Serializable {\n    private static final long serialVersionUID = 1L;\n\n    private final List<Object> options;\n\n    /** Creates an empty required-options tracker. */\n    RequiredOptions() {\n        options = new ArrayList<>();\n    }\n\n    /** Creates a tracker initialized with the supplied required elements. */\n    RequiredOptions(final Collection<?> requiredOptions) {\n        options = new ArrayList<>(requiredOptions);\n    }\n\n    /** Adds a required option key, preserving the original replacement order. */\n    void addOption(final String key) {\n        if (options.contains(key)) {\n            options.remove(options.indexOf(key));\n        }\n        options.add(key);\n    }\n\n    /** Adds a required option group. */\n    void addGroup(final OptionGroup group) {\n        options.add(group);\n    }\n\n    /** Marks an option and its group as present. */\n    void markSeen(final Option option, final OptionGroup group) throws AlreadySelectedException {\n        if (option.isRequired()) {\n            options.remove(option.getKey());\n        }\n        if (group != null) {\n            if (group.isRequired()) {\n                options.remove(group);\n            }\n            group.setSelected(option);\n        }\n    }\n\n    /** Throws if required options remain. */\n    void checkAllPresent() throws MissingOptionException {\n        if (!options.isEmpty()) {\n            throw new MissingOptionException(options);\n        }\n    }\n\n    /** Gets the mutable tracked elements. */\n    List<Object> getOptions() {\n        return options;\n    }\n}\n"
+  }
+ }
+]

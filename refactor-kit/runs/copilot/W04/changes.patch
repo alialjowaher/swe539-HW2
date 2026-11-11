@@ -1,0 +1,129 @@
+diff --git a/src/main/java/org/apache/commons/cli/HelpFormatter.java b/src/main/java/org/apache/commons/cli/HelpFormatter.java
+index 2e86455..a985d86 100644
+--- a/src/main/java/org/apache/commons/cli/HelpFormatter.java
++++ b/src/main/java/org/apache/commons/cli/HelpFormatter.java
+@@ -67,6 +67,18 @@ import java.util.function.Supplier;
+  */
+ public class HelpFormatter {
+ 
++    private static final class Layout {
++        private final int width;
++        private final int leftPad;
++        private final int descPad;
++
++        private Layout(final int width, final int leftPad, final int descPad) {
++            this.width = width;
++            this.leftPad = leftPad;
++            this.descPad = descPad;
++        }
++    }
++
+     /**
+      * Builds {@link HelpFormatter}.
+      *
+@@ -405,14 +417,18 @@ public class HelpFormatter {
+      * @throws IOException if an I/O error occurs.
+      */
+     <A extends Appendable> A appendOptions(final A sb, final int width, final Options options, final int leftPad, final int descPad) throws IOException {
+-        final String lpad = createPadding(leftPad);
+-        final String dpad = createPadding(descPad);
++        return appendOptions(sb, options, new Layout(width, leftPad, descPad));
++    }
++
++    private <A extends Appendable> A appendOptions(final A sb, final Options options, final Layout layout) throws IOException {
++        final String lpad = createPadding(layout.leftPad);
++        final String dpad = createPadding(layout.descPad);
+         // first create list containing only <lpad>-a,--aaa where
+         // -a is opt and --aaa is long opt; in parallel look for
+         // the longest opt string this list will be then used to
+         // sort options ascending
+         int max = 0;
+-        final int maxSince = showSince ? determineMaxSinceLength(options) + leftPad : 0;
++        final int maxSince = showSince ? determineMaxSinceLength(options) + layout.leftPad : 0;
+         final List<StringBuilder> prefixList = new ArrayList<>();
+         final List<Option> optList = options.helpOptions();
+         if (getOptionComparator() != null) {
+@@ -442,12 +458,12 @@ public class HelpFormatter {
+             prefixList.add(optBuf);
+             max = Math.max(optBuf.length() + maxSince, max);
+         }
+-        final int nextLineTabStop = max + descPad;
++        final int nextLineTabStop = max + layout.descPad;
+         if (showSince) {
+-            final StringBuilder optHeader = new StringBuilder(HEADER_OPTIONS).append(createPadding(max - maxSince - HEADER_OPTIONS.length() + leftPad))
++            final StringBuilder optHeader = new StringBuilder(HEADER_OPTIONS).append(createPadding(max - maxSince - HEADER_OPTIONS.length() + layout.leftPad))
+                     .append(HEADER_SINCE);
+             optHeader.append(createPadding(max - optHeader.length())).append(lpad).append(HEADER_DESCRIPTION);
+-            appendWrappedText(sb, width, nextLineTabStop, optHeader.toString());
++            appendWrappedText(sb, layout.width, nextLineTabStop, optHeader.toString());
+             sb.append(getNewLine());
+         }
+ 
+@@ -469,7 +485,7 @@ public class HelpFormatter {
+             } else if (option.getDescription() != null) {
+                 optBuf.append(option.getDescription());
+             }
+-            appendWrappedText(sb, width, nextLineTabStop, optBuf.toString());
++            appendWrappedText(sb, layout.width, nextLineTabStop, optBuf.toString());
+             if (it.hasNext()) {
+                 sb.append(getNewLine());
+             }
+@@ -735,20 +751,25 @@ public class HelpFormatter {
+      */
+     public void printHelp(final PrintWriter pw, final int width, final String cmdLineSyntax, final String header, final Options options, final int leftPad,
+         final int descPad, final String footer, final boolean autoUsage) {
++        printHelp(pw, cmdLineSyntax, header, options, footer, autoUsage, new Layout(width, leftPad, descPad));
++    }
++
++    private void printHelp(final PrintWriter pw, final String cmdLineSyntax, final String header, final Options options, final String footer,
++        final boolean autoUsage, final Layout layout) {
+         if (Util.isEmpty(cmdLineSyntax)) {
+             throw new IllegalArgumentException("cmdLineSyntax not provided");
+         }
+         if (autoUsage) {
+-            printUsage(pw, width, cmdLineSyntax, options);
++            printUsage(pw, layout.width, cmdLineSyntax, options);
+         } else {
+-            printUsage(pw, width, cmdLineSyntax);
++            printUsage(pw, layout.width, cmdLineSyntax);
+         }
+         if (header != null && !header.isEmpty()) {
+-            printWrapped(pw, width, header);
++            printWrapped(pw, layout.width, header);
+         }
+-        printOptions(pw, width, options, leftPad, descPad);
++        printOptions(pw, options, layout);
+         if (footer != null && !footer.isEmpty()) {
+-            printWrapped(pw, width, footer);
++            printWrapped(pw, layout.width, footer);
+         }
+     }
+ 
+@@ -813,8 +834,12 @@ public class HelpFormatter {
+      * @param descPad the number of characters of padding to be prefixed to each description line
+      */
+     public void printOptions(final PrintWriter pw, final int width, final Options options, final int leftPad, final int descPad) {
++        printOptions(pw, options, new Layout(width, leftPad, descPad));
++    }
++
++    private void printOptions(final PrintWriter pw, final Options options, final Layout layout) {
+         try {
+-            pw.println(appendOptions(new StringBuilder(), width, options, leftPad, descPad));
++            pw.println(appendOptions(new StringBuilder(), options, layout));
+         } catch (final IOException e) {
+             // Cannot happen
+             throw new UncheckedIOException(e);
+@@ -916,8 +941,12 @@ public class HelpFormatter {
+      * @return the StringBuffer with the rendered Options contents.
+      */
+     protected StringBuffer renderOptions(final StringBuffer sb, final int width, final Options options, final int leftPad, final int descPad) {
++        return renderOptions(sb, options, new Layout(width, leftPad, descPad));
++    }
++
++    private StringBuffer renderOptions(final StringBuffer sb, final Options options, final Layout layout) {
+         try {
+-            return appendOptions(sb, width, options, leftPad, descPad);
++            return appendOptions(sb, layout.width, options, layout.leftPad, layout.descPad);
+         } catch (final IOException e) {
+             // Cannot happen
+             throw new UncheckedIOException(e);

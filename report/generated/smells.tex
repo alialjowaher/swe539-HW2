@@ -1,0 +1,10 @@
+\begin{tabularx}{\linewidth}{@{}l l l >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{5.6cm}@{}}
+\toprule
+ID & Type & Smell & Location & Prescribed refactoring \\
+\midrule
+W01 & Within & Long Method & \texttt{HelpFormatter.appendOptions} & Extract Method ($\times$3); Replace Temp with Query where practical \\
+W04 & Within & Long Parameter List & \texttt{HelpFormatter.printHelp} (9 parameters) & Introduce Parameter Object; Preserve Whole Object \\
+B01 & Between & Feature Envy & \texttt{HelpFormatter}, \texttt{OptionGroup} $\to$ \texttt{Option} & Extract Method, then Move Method (to Option) \\
+B02 & Between & Shotgun Surgery & \texttt{Options}, \texttt{DefaultParser}, \texttt{Parser}, \texttt{MissingOptionException} & Extract Class + Move Method + Move Field \\
+\bottomrule
+\end{tabularx}

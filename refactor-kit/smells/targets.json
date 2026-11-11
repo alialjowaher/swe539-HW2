@@ -1,0 +1,20 @@
+{
+  "_about": "Machine-readable locations for each smell ID in the review sheet. Member specs: name | name/N (N parameters) | name(Type,Type) | Owner.name (nested class) | #field | * (whole file). Files are relative to source_root in config.json.",
+  "W01": {"targets": {"HelpFormatter.java": ["appendOptions"]}, "tests": ["HelpFormatterTest"]},
+  "W02": {"targets": {"DefaultParser.java": ["handleShortAndLongOption"]}, "tests": ["DefaultParserTest", "ArgumentIsOptionTest", "DisablePartialMatchingTest"]},
+  "W03": {"targets": {"HelpFormatter.java": ["*"]}, "tests": ["HelpFormatterTest"]},
+  "W04": {"targets": {"HelpFormatter.java": ["printHelp/9", "printHelp/8", "printOptions", "renderOptions", "appendOptions"]}, "tests": ["HelpFormatterTest"]},
+  "W05": {"targets": {"DefaultParser.java": ["handleLongOptionWithEqual", "handleShortAndLongOption"]}, "tests": ["DefaultParserTest", "ArgumentIsOptionTest"]},
+  "W06": {"targets": {"DefaultParser.java": ["handleLongOptionWithEqual", "handleLongOptionWithoutEqual"]}, "tests": ["DefaultParserTest", "DisablePartialMatchingTest"]},
+  "W07": {"targets": {"HelpFormatter.java": ["appendOptionGroup", "appendOptions", "printUsage/4", "printOptions", "renderOptions", "renderWrappedText"]}, "tests": ["HelpFormatterTest"]},
+  "W08": {"targets": {"PatternOptionBuilder.java": ["parsePattern", "getValueType", "isValueCode"]}, "tests": ["PatternOptionBuilderTest"]},
+  "W09": {"targets": {"CommandLine.java": ["getOptionValue(Option)", "getOptionValue(OptionGroup)", "getOptionValue(Option,Supplier<String>)", "getOptionValue(OptionGroup,Supplier<String>)", "getOptionProperties", "resolveOption"]}, "tests": ["CommandLineTest", "ValueTest", "ValuesTest"]},
+  "W10": {"targets": {"Parser.java": ["parse/4"]}, "tests": ["BasicParserTest", "GnuParserTest", "PosixParserTest"]},
+  "W11": {"targets": {"HelpFormatter.java": ["printUsage/4"], "Option.java": ["processValue"]}, "tests": ["HelpFormatterTest", "OptionTest", "ValuesTest"]},
+  "W12": {"targets": {"DefaultParser.java": ["stripLeadingAndTrailingQuotesDefaultOn", "stripLeadingAndTrailingQuotesDefaultOff", "DefaultParser/0", "DefaultParser/1", "Builder.setAllowPartialMatching"]}, "tests": ["DefaultParserTest"]},
+  "W13": {"targets": {"DefaultParser.java": ["isNegativeNumber", "isArgument"]}, "tests": ["DefaultParserTest", "ValueTest"]},
+  "W14": {"targets": {"Options.java": ["#shortOpts", "addOption/1", "hasShortOption", "helpOptions"]}, "tests": ["OptionsTest", "HelpFormatterTest"]},
+  "W15": {"targets": {"Option.java": ["#option", "#longOption", "#argCount", "getOpt", "getLongOpt", "setLongOpt", "getArgs", "setArgs", "hasArg/0", "hasArgs", "Builder.numberOfArgs"]}, "tests": ["OptionTest", "OptionBuilderTest"]},
+  "B01": {"targets": {"HelpFormatter.java": ["appendOption", "appendOptions", "getDescription"], "OptionGroup.java": ["toString"], "Option.java": []}, "tests": ["HelpFormatterTest", "OptionGroupTest", "OptionTest"]},
+  "B02": {"targets": {"Options.java": ["#requiredOpts", "addOption/1", "addOptionGroup", "getRequiredOptions"], "DefaultParser.java": ["#expectedOpts", "checkRequiredOptions", "updateRequiredOptions", "parse/4"], "Parser.java": ["#requiredOptions", "checkRequiredOptions", "getRequiredOptions", "setOptions", "updateRequiredOptions"], "MissingOptionException.java": ["*"]}, "tests": ["OptionsTest", "DefaultParserTest", "BasicParserTest", "GnuParserTest", "PosixParserTest", "OptionGroupTest"]}
+}

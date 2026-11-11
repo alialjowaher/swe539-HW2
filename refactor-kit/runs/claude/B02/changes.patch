@@ -1,0 +1,258 @@
+diff --git a/src/main/java/org/apache/commons/cli/DefaultParser.java b/src/main/java/org/apache/commons/cli/DefaultParser.java
+index 883e74a..8fbaac6 100644
+--- a/src/main/java/org/apache/commons/cli/DefaultParser.java
++++ b/src/main/java/org/apache/commons/cli/DefaultParser.java
+@@ -178,6 +178,9 @@ public class DefaultParser implements CommandLineParser {
+     /** The required options and groups expected to be found when parsing the command line. */
+     protected List expectedOpts;
+ 
++    /** Tracks the required options and groups not found yet; {@link #expectedOpts} is its live list. */
++    private RequiredOptions requiredOptions;
++
+     /** Flag indicating if partial matching of long options is supported. */
+     private final boolean allowPartialMatching;
+ 
+@@ -276,10 +279,7 @@ public class DefaultParser implements CommandLineParser {
+      * @throws MissingOptionException if any of the required Options are not present.
+      */
+     protected void checkRequiredOptions() throws MissingOptionException {
+-        // if there are required options that have not been processed
+-        if (!expectedOpts.isEmpty()) {
+-            throw new MissingOptionException(expectedOpts);
+-        }
++        requiredOptions.checkAllPresent();
+     }
+ 
+     /**
+@@ -421,7 +421,7 @@ public class DefaultParser implements CommandLineParser {
+         // check the previous option before handling the next one
+         checkRequiredArgs();
+         final Option copy = (Option) option.clone();
+-        updateRequiredOptions(copy);
++        requiredOptions.markSeen(copy, options.getOptionGroup(copy));
+         cmd.addOption(copy);
+         currentOption = copy.hasArg() ? copy : null;
+     }
+@@ -705,7 +705,8 @@ public class DefaultParser implements CommandLineParser {
+         this.stopAtNonOption = stopAtNonOption;
+         skipParsing = false;
+         currentOption = null;
+-        expectedOpts = new ArrayList<>(options.getRequiredOptions());
++        requiredOptions = new RequiredOptions(options);
++        expectedOpts = requiredOptions.getExpected();
+         // clear the data from the groups
+         for (final OptionGroup group : options.getOptionGroups()) {
+             group.setSelected(null);
+@@ -751,26 +752,4 @@ public class DefaultParser implements CommandLineParser {
+         }
+         return token;
+     }
+-
+-    /**
+-     * Removes the option or its group from the list of expected elements.
+-     *
+-     * @param option
+-     */
+-    private void updateRequiredOptions(final Option option) throws AlreadySelectedException {
+-        if (option.isRequired()) {
+-            expectedOpts.remove(option.getKey());
+-        }
+-
+-        // if the option is in an OptionGroup make that option the selected option of the group
+-        if (options.getOptionGroup(option) != null) {
+-            final OptionGroup group = options.getOptionGroup(option);
+-
+-            if (group.isRequired()) {
+-                expectedOpts.remove(group);
+-            }
+-
+-            group.setSelected(option);
+-        }
+-    }
+ }
+diff --git a/src/main/java/org/apache/commons/cli/Parser.java b/src/main/java/org/apache/commons/cli/Parser.java
+index ae35b6c..14be238 100644
+--- a/src/main/java/org/apache/commons/cli/Parser.java
++++ b/src/main/java/org/apache/commons/cli/Parser.java
+@@ -17,7 +17,6 @@
+ 
+ package org.apache.commons.cli;
+ 
+-import java.util.ArrayList;
+ import java.util.Arrays;
+ import java.util.Enumeration;
+ import java.util.List;
+@@ -37,8 +36,8 @@ public abstract class Parser implements CommandLineParser {
+     /** Current Options */
+     private Options options;
+ 
+-    /** List of required options strings */
+-    private List requiredOptions;
++    /** Tracks the required options and groups not found yet. */
++    private RequiredOptions requiredOptions;
+ 
+     /**
+      * Throws a {@link MissingOptionException} if all of the required options are not present.
+@@ -46,10 +45,7 @@ public abstract class Parser implements CommandLineParser {
+      * @throws MissingOptionException if any of the required Options are not present.
+      */
+     protected void checkRequiredOptions() throws MissingOptionException {
+-        // if there are required options that have not been processed
+-        if (!getRequiredOptions().isEmpty()) {
+-            throw new MissingOptionException(getRequiredOptions());
+-        }
++        requiredOptions.checkAllPresent();
+     }
+ 
+     /**
+@@ -78,7 +74,7 @@ public abstract class Parser implements CommandLineParser {
+      * @return the required options.
+      */
+     protected List getRequiredOptions() {
+-        return requiredOptions;
++        return requiredOptions == null ? null : requiredOptions.getExpected();
+     }
+ 
+     /**
+@@ -246,7 +242,7 @@ public abstract class Parser implements CommandLineParser {
+         // get the option represented by arg
+         final Option opt = (Option) getOptions().getOption(arg).clone();
+         // update the required options and groups
+-        updateRequiredOptions(opt);
++        requiredOptions.markSeen(opt, getOptions().getOptionGroup(opt));
+         // if the option takes an argument value
+         if (opt.hasArg()) {
+             processArgs(opt, iter);
+@@ -291,7 +287,7 @@ public abstract class Parser implements CommandLineParser {
+                     continue;
+                 }
+                 cmd.addOption(opt);
+-                updateRequiredOptions(opt);
++                requiredOptions.markSeen(opt, getOptions().getOptionGroup(opt));
+             }
+         }
+     }
+@@ -303,29 +299,7 @@ public abstract class Parser implements CommandLineParser {
+      */
+     protected void setOptions(final Options options) {
+         this.options = options;
+-        this.requiredOptions = new ArrayList<>(options.getRequiredOptions());
+-    }
+-
+-    /**
+-     * Removes the option or its group from the list of expected elements.
+-     *
+-     * @param opt
+-     */
+-    private void updateRequiredOptions(final Option opt) throws ParseException {
+-        // if the option is a required option remove the option from
+-        // the requiredOptions list
+-        if (opt.isRequired()) {
+-            getRequiredOptions().remove(opt.getKey());
+-        }
+-        // if the option is in an OptionGroup make that option the selected
+-        // option of the group
+-        if (getOptions().getOptionGroup(opt) != null) {
+-            final OptionGroup group = getOptions().getOptionGroup(opt);
+-            if (group.isRequired()) {
+-                getRequiredOptions().remove(group);
+-            }
+-            group.setSelected(opt);
+-        }
++        this.requiredOptions = new RequiredOptions(options);
+     }
+ 
+ }
+diff --git a/src/main/java/org/apache/commons/cli/RequiredOptions.java b/src/main/java/org/apache/commons/cli/RequiredOptions.java
+new file mode 100644
+index 0000000..64cf35f
+--- /dev/null
++++ b/src/main/java/org/apache/commons/cli/RequiredOptions.java
+@@ -0,0 +1,87 @@
++/*
++  Licensed to the Apache Software Foundation (ASF) under one or more
++  contributor license agreements.  See the NOTICE file distributed with
++  this work for additional information regarding copyright ownership.
++  The ASF licenses this file to You under the Apache License, Version 2.0
++  (the "License"); you may not use this file except in compliance with
++  the License.  You may obtain a copy of the License at
++
++      http://www.apache.org/licenses/LICENSE-2.0
++
++  Unless required by applicable law or agreed to in writing, software
++  distributed under the License is distributed on an "AS IS" BASIS,
++  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++  See the License for the specific language governing permissions and
++  limitations under the License.
++ */
++
++package org.apache.commons.cli;
++
++import java.util.ArrayList;
++import java.util.List;
++
++/**
++ * Tracks, for one parse, the required options and required option groups that have not been found yet on the command
++ * line.
++ * <p>
++ * The expected elements are the ones returned by {@link Options#getRequiredOptions()}: {@code String} keys for required
++ * options and {@link OptionGroup} instances for required groups, in the same order.
++ * </p>
++ */
++final class RequiredOptions {
++
++    /** The required options and groups still expected to be found when parsing the command line. */
++    private final List<Object> expected;
++
++    /**
++     * Constructs a new instance expecting all the required options and groups of the specified options.
++     *
++     * @param options the options being parsed.
++     */
++    RequiredOptions(final Options options) {
++        this.expected = new ArrayList<>(options.getRequiredOptions());
++    }
++
++    /**
++     * Throws a {@link MissingOptionException} if all of the required options are not present.
++     *
++     * @throws MissingOptionException if any of the required Options are not present.
++     */
++    void checkAllPresent() throws MissingOptionException {
++        // if there are required options that have not been processed
++        if (!expected.isEmpty()) {
++            throw new MissingOptionException(expected);
++        }
++    }
++
++    /**
++     * Gets the live list of the required options and groups not found yet.
++     *
++     * @return the required options and groups still expected.
++     */
++    List<Object> getExpected() {
++        return expected;
++    }
++
++    /**
++     * Removes the option or its group from the list of expected elements, and makes the option the selected option of
++     * its group.
++     *
++     * @param option the option found on the command line.
++     * @param group the group of the option, or {@code null} if the option is not in a group.
++     * @throws AlreadySelectedException if another option of the group has already been selected.
++     */
++    void markSeen(final Option option, final OptionGroup group) throws AlreadySelectedException {
++        // if the option is a required option remove the option from the expected list
++        if (option.isRequired()) {
++            expected.remove(option.getKey());
++        }
++        // if the option is in an OptionGroup make that option the selected option of the group
++        if (group != null) {
++            if (group.isRequired()) {
++                expected.remove(group);
++            }
++            group.setSelected(option);
++        }
++    }
++}

@@ -1,0 +1,43 @@
+{
+  "smell": "W04",
+  "smell_name": "Long Parameter List",
+  "smell_type": "Within class",
+  "classes": "HelpFormatter",
+  "member": "printHelp(PrintWriter, int, String, String, Options, int, int, String, boolean)",
+  "lines": "736\u2013753 (also 717\u2013720)",
+  "technique": "Introduce Parameter Object; Preserve Whole Object",
+  "technique_source": "review sheet suggestion (column 'Suggested refactoring')",
+  "llm": "Copilot",
+  "llm_slug": "copilot",
+  "model": "Copilot SDK in VS Code (2026-11-10)",
+  "mode": "agent",
+  "base_ref": "rel/commons-cli-1.9.0",
+  "base_commit": "698b238276c0e22e97e4aec703a0b00201d29666",
+  "branch": "refactor/W04",
+  "workspace": "workspace/copilot/commons-cli",
+  "started": "2026-11-10 21:02",
+  "status": "finished",
+  "finish_attempts": 1,
+  "finished": "2026-11-10 21:10",
+  "commit": "462dc8c7fb6fb16806eea50f7047dc0e9784058d",
+  "verdict": "PASS",
+  "verdict_reasons": [],
+  "files_changed": [
+    "src/main/java/org/apache/commons/cli/HelpFormatter.java (+43 -14)"
+  ],
+  "lines_added": 43,
+  "lines_removed": 14,
+  "members": {
+    "changed": 4,
+    "new": 9,
+    "removed": 0,
+    "new file": 0,
+    "deleted file": 0
+  },
+  "regressions": [],
+  "test_files_modified": [],
+  "other_files_modified": [],
+  "api_removed": [],
+  "api_added": [],
+  "process_template_lines_left": 0
+}

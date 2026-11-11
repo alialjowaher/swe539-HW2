@@ -1,0 +1,158 @@
+// [smell location] HelpFormatter.java > HelpFormatter.getDescription(Option)  (lines 220-229)
+    /**
+     * Gets the option description or an empty string if the description is {@code null}.
+     * @param option The option to get the description from.
+     * @return the option description or an empty string if the description is {@code null}.
+     * @since 1.8.0
+     */
+    public static String getDescription(final Option option) {
+        final String desc = option.getDescription();
+        return desc == null ? "" : desc;
+    }
+
+// [smell location] HelpFormatter.java > HelpFormatter.appendOption(StringBuilder,Option,boolean)  (lines 339-364)
+    /**
+     * Appends the usage clause for an Option to a StringBuffer.
+     *
+     * @param buff the StringBuffer to append to
+     * @param option the Option to append
+     * @param required whether the Option is required or not
+     */
+    private void appendOption(final StringBuilder buff, final Option option, final boolean required) {
+        if (!required) {
+            buff.append("[");
+        }
+        if (option.getOpt() != null) {
+            buff.append("-").append(option.getOpt());
+        } else {
+            buff.append("--").append(option.getLongOpt());
+        }
+        // if the Option has a value and a non blank argname
+        if (option.hasArg() && (option.getArgName() == null || !option.getArgName().isEmpty())) {
+            buff.append(option.getOpt() == null ? longOptSeparator : " ");
+            buff.append("<").append(option.getArgName() != null ? option.getArgName() : getArgName()).append(">");
+        }
+        // if the Option is not a required option
+        if (!required) {
+            buff.append("]");
+        }
+    }
+
+// [smell location] HelpFormatter.java > HelpFormatter.appendOptions(A,int,Options,int,int)  (lines 396-478)
+    /**
+     * Renders the specified Options and return the rendered Options in a StringBuffer.
+     *
+     * @param sb The StringBuffer to place the rendered Options into.
+     * @param width The number of characters to display per line
+     * @param options The command line Options
+     * @param leftPad the number of characters of padding to be prefixed to each line
+     * @param descPad the number of characters of padding to be prefixed to each description line
+     * @return the StringBuffer with the rendered Options contents.
+     * @throws IOException if an I/O error occurs.
+     */
+    <A extends Appendable> A appendOptions(final A sb, final int width, final Options options, final int leftPad, final int descPad) throws IOException {
+        final String lpad = createPadding(leftPad);
+        final String dpad = createPadding(descPad);
+        // first create list containing only <lpad>-a,--aaa where
+        // -a is opt and --aaa is long opt; in parallel look for
+        // the longest opt string this list will be then used to
+        // sort options ascending
+        int max = 0;
+        final int maxSince = showSince ? determineMaxSinceLength(options) + leftPad : 0;
+        final List<StringBuilder> prefixList = new ArrayList<>();
+        final List<Option> optList = options.helpOptions();
+        if (getOptionComparator() != null) {
+            Collections.sort(optList, getOptionComparator());
+        }
+        for (final Option option : optList) {
+            final StringBuilder optBuf = new StringBuilder();
+            if (option.getOpt() == null) {
+                optBuf.append(lpad).append("   ").append(getLongOptPrefix()).append(option.getLongOpt());
+            } else {
+                optBuf.append(lpad).append(getOptPrefix()).append(option.getOpt());
+                if (option.hasLongOpt()) {
+                    optBuf.append(',').append(getLongOptPrefix()).append(option.getLongOpt());
+                }
+            }
+            if (option.hasArg()) {
+                final String argName = option.getArgName();
+                if (argName != null && argName.isEmpty()) {
+                    // if the option has a blank argname
+                    optBuf.append(' ');
+                } else {
+                    optBuf.append(option.hasLongOpt() ? longOptSeparator : " ");
+                    optBuf.append("<").append(argName != null ? option.getArgName() : getArgName()).append(">");
+                }
+            }
+
+            prefixList.add(optBuf);
+            max = Math.max(optBuf.length() + maxSince, max);
+        }
+        final int nextLineTabStop = max + descPad;
+        if (showSince) {
+            final StringBuilder optHeader = new StringBuilder(HEADER_OPTIONS).append(createPadding(max - maxSince - HEADER_OPTIONS.length() + leftPad))
+                    .append(HEADER_SINCE);
+            optHeader.append(createPadding(max - optHeader.length())).append(lpad).append(HEADER_DESCRIPTION);
+            appendWrappedText(sb, width, nextLineTabStop, optHeader.toString());
+            sb.append(getNewLine());
+        }
+
+        int x = 0;
+        for (final Iterator<Option> it = optList.iterator(); it.hasNext();) {
+            final Option option = it.next();
+            final StringBuilder optBuf = new StringBuilder(prefixList.get(x++).toString());
+            if (optBuf.length() < max) {
+                optBuf.append(createPadding(max - maxSince - optBuf.length()));
+                if (showSince) {
+                    optBuf.append(lpad).append(option.getSince() == null ? "-" : option.getSince());
+                }
+                optBuf.append(createPadding(max - optBuf.length()));
+            }
+            optBuf.append(dpad);
+
+            if (deprecatedFormatFunction != null && option.isDeprecated()) {
+                optBuf.append(deprecatedFormatFunction.apply(option).trim());
+            } else if (option.getDescription() != null) {
+                optBuf.append(option.getDescription());
+            }
+            appendWrappedText(sb, width, nextLineTabStop, optBuf.toString());
+            if (it.hasNext()) {
+                sb.append(getNewLine());
+            }
+        }
+        return sb;
+    }
+
+// [smell location] OptionGroup.java > OptionGroup.toString()  (lines 137-168)
+    /**
+     * Returns the stringified version of this OptionGroup.
+     *
+     * @return the stringified representation of this group
+     */
+    @Override
+    public String toString() {
+        final StringBuilder buff = new StringBuilder();
+        final Iterator<Option> iter = getOptions().iterator();
+        buff.append("[");
+        while (iter.hasNext()) {
+            final Option option = iter.next();
+            if (option.getOpt() != null) {
+                buff.append("-");
+                buff.append(option.getOpt());
+            } else {
+                buff.append("--");
+                buff.append(option.getLongOpt());
+            }
+
+            if (option.getDescription() != null) {
+                buff.append(Char.SP);
+                buff.append(option.getDescription());
+            }
+
+            if (iter.hasNext()) {
+                buff.append(", ");
+            }
+        }
+        buff.append("]");
+        return buff.toString();
+    }

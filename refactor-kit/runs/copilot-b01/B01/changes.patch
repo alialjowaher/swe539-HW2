@@ -1,0 +1,127 @@
+diff --git a/src/main/java/org/apache/commons/cli/HelpFormatter.java b/src/main/java/org/apache/commons/cli/HelpFormatter.java
+index 2e86455..e112847 100644
+--- a/src/main/java/org/apache/commons/cli/HelpFormatter.java
++++ b/src/main/java/org/apache/commons/cli/HelpFormatter.java
+@@ -224,8 +224,7 @@ public class HelpFormatter {
+      * @since 1.8.0
+      */
+     public static String getDescription(final Option option) {
+-        final String desc = option.getDescription();
+-        return desc == null ? "" : desc;
++        return option.getDescriptionOrEmpty();
+     }
+ 
+     /**
+@@ -347,11 +346,7 @@ public class HelpFormatter {
+         if (!required) {
+             buff.append("[");
+         }
+-        if (option.getOpt() != null) {
+-            buff.append("-").append(option.getOpt());
+-        } else {
+-            buff.append("--").append(option.getLongOpt());
+-        }
++        buff.append(option.getOpt() == null ? option.toLabel("-", "--") : option.toLabel("-", null));
+         // if the Option has a value and a non blank argname
+         if (option.hasArg() && (option.getArgName() == null || !option.getArgName().isEmpty())) {
+             buff.append(option.getOpt() == null ? longOptSeparator : " ");
+@@ -420,14 +415,11 @@ public class HelpFormatter {
+         }
+         for (final Option option : optList) {
+             final StringBuilder optBuf = new StringBuilder();
++            optBuf.append(lpad);
+             if (option.getOpt() == null) {
+-                optBuf.append(lpad).append("   ").append(getLongOptPrefix()).append(option.getLongOpt());
+-            } else {
+-                optBuf.append(lpad).append(getOptPrefix()).append(option.getOpt());
+-                if (option.hasLongOpt()) {
+-                    optBuf.append(',').append(getLongOptPrefix()).append(option.getLongOpt());
+-                }
++                optBuf.append("   ");
+             }
++            optBuf.append(option.toLabel(getOptPrefix(), getLongOptPrefix()));
+             if (option.hasArg()) {
+                 final String argName = option.getArgName();
+                 if (argName != null && argName.isEmpty()) {
+@@ -466,8 +458,8 @@ public class HelpFormatter {
+ 
+             if (deprecatedFormatFunction != null && option.isDeprecated()) {
+                 optBuf.append(deprecatedFormatFunction.apply(option).trim());
+-            } else if (option.getDescription() != null) {
+-                optBuf.append(option.getDescription());
++            } else if (!option.getDescriptionOrEmpty().isEmpty()) {
++                optBuf.append(option.getDescriptionOrEmpty());
+             }
+             appendWrappedText(sb, width, nextLineTabStop, optBuf.toString());
+             if (it.hasNext()) {
+diff --git a/src/main/java/org/apache/commons/cli/Option.java b/src/main/java/org/apache/commons/cli/Option.java
+index d2c6f5c..63cb207 100644
+--- a/src/main/java/org/apache/commons/cli/Option.java
++++ b/src/main/java/org/apache/commons/cli/Option.java
+@@ -619,6 +619,15 @@ public class Option implements Cloneable, Serializable {
+         return description;
+     }
+ 
++    /**
++     * Gets the option description or an empty string if the description is null.
++     *
++     * @return the option description or an empty string if the description is null.
++     */
++    String getDescriptionOrEmpty() {
++        return description == null ? "" : description;
++    }
++
+     /**
+      * Gets the id of this Option. This is only set when the Option shortOpt is a single character. This is used for switch statements.
+      *
+@@ -660,6 +669,26 @@ public class Option implements Cloneable, Serializable {
+         return option;
+     }
+ 
++    /**
++     * Gets the option label using the supplied short and long option prefixes.
++     *
++     * @param optPrefix the prefix for the short option.
++     * @param longOptPrefix the prefix for the long option.
++     * @return the formatted option label.
++     */
++    String toLabel(final String optPrefix, final String longOptPrefix) {
++        final StringBuilder label = new StringBuilder();
++        if (option != null) {
++            label.append(optPrefix).append(option);
++            if (longOption != null && longOptPrefix != null) {
++                label.append(',').append(longOptPrefix).append(longOption);
++            }
++        } else {
++            label.append(longOptPrefix).append(longOption);
++        }
++        return label.toString();
++    }
++
+     /**
+      * Gets the version when this option was added.
+      * @return the version when this option was added, or {@code null} if not set.
+diff --git a/src/main/java/org/apache/commons/cli/OptionGroup.java b/src/main/java/org/apache/commons/cli/OptionGroup.java
+index 0685179..3ac2600 100644
+--- a/src/main/java/org/apache/commons/cli/OptionGroup.java
++++ b/src/main/java/org/apache/commons/cli/OptionGroup.java
+@@ -146,17 +146,11 @@ public class OptionGroup implements Serializable {
+         buff.append("[");
+         while (iter.hasNext()) {
+             final Option option = iter.next();
+-            if (option.getOpt() != null) {
+-                buff.append("-");
+-                buff.append(option.getOpt());
+-            } else {
+-                buff.append("--");
+-                buff.append(option.getLongOpt());
+-            }
++            buff.append(option.getOpt() == null ? option.toLabel("-", "--") : option.toLabel("-", null));
+ 
+             if (option.getDescription() != null) {
+                 buff.append(Char.SP);
+-                buff.append(option.getDescription());
++                buff.append(option.getDescriptionOrEmpty());
+             }
+ 
+             if (iter.hasNext()) {

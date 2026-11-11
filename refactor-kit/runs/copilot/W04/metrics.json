@@ -1,0 +1,287 @@
+{
+ "run": "W04 - Copilot",
+ "tool": "com.github.mauricioaniche:ck:0.7.0",
+ "measured": "2026-11-10 21:10",
+ "before_commit": "698b238276c0e22e97e4aec703a0b00201d29666",
+ "after_commit": "462dc8c7fb6fb16806eea50f7047dc0e9784058d",
+ "files": [
+  "src/main/java/org/apache/commons/cli/HelpFormatter.java"
+ ],
+ "class_rule": "the top-level class of every affected file (the smell's target files plus the source files the run changed), plus any other class in those files that holds a target member, is new or removed, or whose CK metrics changed",
+ "metrics": {
+  "Size": {
+   "before": 425,
+   "after": 457,
+   "change": 32,
+   "ck": "loc",
+   "aggregate": "sum",
+   "label": "LOC (CK loc)"
+  },
+  "Cohesion": {
+   "before": 0.9549,
+   "after": 0.4792,
+   "change": -0.4757,
+   "ck": "lcom*",
+   "aggregate": "mean",
+   "label": "LCOM* (CK lcom*, Henderson-Sellers; 0 = cohesive, 1 = no cohesion)"
+  },
+  "Coupling": {
+   "before": 9,
+   "after": 10,
+   "change": 1,
+   "ck": "cbo",
+   "aggregate": "sum",
+   "label": "CBO (CK cbo)"
+  }
+ },
+ "classes": [
+  {
+   "class": "org.apache.commons.cli.HelpFormatter",
+   "file": "src/main/java/org/apache/commons/cli/HelpFormatter.java",
+   "counted": true,
+   "before": {
+    "loc": 425,
+    "wmc": 121,
+    "cbo": 9,
+    "rfc": 77,
+    "lcom": 1092,
+    "lcom*": 0.9549,
+    "tcc": 0,
+    "totalMethodsQty": 49
+   },
+   "after": {
+    "loc": 447,
+    "wmc": 125,
+    "cbo": 10,
+    "rfc": 80,
+    "lcom": 1294,
+    "lcom*": 0.9583,
+    "tcc": 0,
+    "totalMethodsQty": 53
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.HelpFormatter$Builder",
+   "file": "src/main/java/org/apache/commons/cli/HelpFormatter.java",
+   "counted": false,
+   "before": {
+    "loc": 24,
+    "wmc": 6,
+    "cbo": 3,
+    "rfc": 4,
+    "lcom": 4,
+    "lcom*": 0.65,
+    "tcc": 0,
+    "totalMethodsQty": 5
+   },
+   "after": {
+    "loc": 24,
+    "wmc": 6,
+    "cbo": 3,
+    "rfc": 4,
+    "lcom": 4,
+    "lcom*": 0.65,
+    "tcc": 0,
+    "totalMethodsQty": 5
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.HelpFormatter$Layout",
+   "file": "src/main/java/org/apache/commons/cli/HelpFormatter.java",
+   "counted": true,
+   "before": null,
+   "after": {
+    "loc": 10,
+    "wmc": 1,
+    "cbo": 0,
+    "rfc": 0,
+    "lcom": 0,
+    "lcom*": 0,
+    "tcc": -1,
+    "totalMethodsQty": 1
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.HelpFormatter$OptionComparator",
+   "file": "src/main/java/org/apache/commons/cli/HelpFormatter.java",
+   "counted": false,
+   "before": {
+    "loc": 6,
+    "wmc": 1,
+    "cbo": 1,
+    "rfc": 2,
+    "lcom": 0,
+    "lcom*": 1,
+    "tcc": null,
+    "totalMethodsQty": 1
+   },
+   "after": {
+    "loc": 6,
+    "wmc": 1,
+    "cbo": 1,
+    "rfc": 2,
+    "lcom": 0,
+    "lcom*": 1,
+    "tcc": null,
+    "totalMethodsQty": 1
+   }
+  }
+ ],
+ "methods": [
+  {
+   "class": "org.apache.commons.cli.HelpFormatter",
+   "method": "appendOptions/5[A,int,org.apache.commons.cli.Options,int,int]",
+   "status": "target",
+   "line": 419,
+   "before": {
+    "loc": 66,
+    "wmc": 20,
+    "parametersQty": 5,
+    "cbo": 4
+   },
+   "after": {
+    "loc": 3,
+    "wmc": 1,
+    "parametersQty": 5,
+    "cbo": 4
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.HelpFormatter",
+   "method": "appendOptions/3[A,org.apache.commons.cli.Options,org.apache.commons.cli.HelpFormatter.Layout]",
+   "status": "target",
+   "line": 423,
+   "before": null,
+   "after": {
+    "loc": 66,
+    "wmc": 20,
+    "parametersQty": 3,
+    "cbo": 5
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.HelpFormatter",
+   "method": "printHelp/8[java.io.PrintWriter,int,java.lang.String,java.lang.String,org.apache.commons.cli.Options,int,int,java.lang.String]",
+   "status": "target",
+   "line": 734,
+   "before": {
+    "loc": 3,
+    "wmc": 1,
+    "parametersQty": 8,
+    "cbo": 2
+   },
+   "after": {
+    "loc": 3,
+    "wmc": 1,
+    "parametersQty": 8,
+    "cbo": 2
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.HelpFormatter",
+   "method": "printHelp/9[java.io.PrintWriter,int,java.lang.String,java.lang.String,org.apache.commons.cli.Options,int,int,java.lang.String,boolean]",
+   "status": "target",
+   "line": 753,
+   "before": {
+    "loc": 18,
+    "wmc": 7,
+    "parametersQty": 9,
+    "cbo": 3
+   },
+   "after": {
+    "loc": 3,
+    "wmc": 1,
+    "parametersQty": 9,
+    "cbo": 3
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.HelpFormatter",
+   "method": "printHelp/7[java.io.PrintWriter,java.lang.String,java.lang.String,org.apache.commons.cli.Options,java.lang.String,boolean,org.apache.commons.cli.HelpFormatter.Layout]",
+   "status": "new",
+   "line": 758,
+   "before": null,
+   "after": {
+    "loc": 18,
+    "wmc": 7,
+    "parametersQty": 7,
+    "cbo": 4
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.HelpFormatter",
+   "method": "printOptions/5[java.io.PrintWriter,int,org.apache.commons.cli.Options,int,int]",
+   "status": "target",
+   "line": 836,
+   "before": {
+    "loc": 8,
+    "wmc": 2,
+    "parametersQty": 5,
+    "cbo": 2
+   },
+   "after": {
+    "loc": 3,
+    "wmc": 1,
+    "parametersQty": 5,
+    "cbo": 3
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.HelpFormatter",
+   "method": "printOptions/3[java.io.PrintWriter,org.apache.commons.cli.Options,org.apache.commons.cli.HelpFormatter.Layout]",
+   "status": "target",
+   "line": 840,
+   "before": null,
+   "after": {
+    "loc": 8,
+    "wmc": 2,
+    "parametersQty": 3,
+    "cbo": 3
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.HelpFormatter",
+   "method": "renderOptions/5[java.lang.StringBuffer,int,org.apache.commons.cli.Options,int,int]",
+   "status": "target",
+   "line": 943,
+   "before": {
+    "loc": 8,
+    "wmc": 2,
+    "parametersQty": 5,
+    "cbo": 2
+   },
+   "after": {
+    "loc": 3,
+    "wmc": 1,
+    "parametersQty": 5,
+    "cbo": 3
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.HelpFormatter",
+   "method": "renderOptions/3[java.lang.StringBuffer,org.apache.commons.cli.Options,org.apache.commons.cli.HelpFormatter.Layout]",
+   "status": "target",
+   "line": 947,
+   "before": null,
+   "after": {
+    "loc": 8,
+    "wmc": 2,
+    "parametersQty": 3,
+    "cbo": 3
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.HelpFormatter$Layout",
+   "method": "Layout/3[int,int,int]",
+   "status": "new",
+   "line": 75,
+   "before": null,
+   "after": {
+    "loc": 5,
+    "wmc": 1,
+    "parametersQty": 3,
+    "cbo": 0
+   }
+  }
+ ]
+}

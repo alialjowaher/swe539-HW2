@@ -1,0 +1,173 @@
+{
+ "run": "W01 - Copilot-W01",
+ "tool": "com.github.mauricioaniche:ck:0.7.0",
+ "measured": "2026-11-10 21:29",
+ "before_commit": "698b238276c0e22e97e4aec703a0b00201d29666",
+ "after_commit": "ff0d8ef2c782d445b20c386e50eba0f30246f6a0",
+ "files": [
+  "src/main/java/org/apache/commons/cli/HelpFormatter.java"
+ ],
+ "class_rule": "the top-level class of every affected file (the smell's target files plus the source files the run changed), plus any other class in those files that holds a target member, is new or removed, or whose CK metrics changed",
+ "metrics": {
+  "Size": {
+   "before": 425,
+   "after": 435,
+   "change": 10,
+   "ck": "loc",
+   "aggregate": "sum",
+   "label": "LOC (CK loc)"
+  },
+  "Cohesion": {
+   "before": 0.9549,
+   "after": 0.9567,
+   "change": 0.0018,
+   "ck": "lcom*",
+   "aggregate": "mean",
+   "label": "LCOM* (CK lcom*, Henderson-Sellers; 0 = cohesive, 1 = no cohesion)"
+  },
+  "Coupling": {
+   "before": 9,
+   "after": 9,
+   "change": 0,
+   "ck": "cbo",
+   "aggregate": "sum",
+   "label": "CBO (CK cbo)"
+  }
+ },
+ "classes": [
+  {
+   "class": "org.apache.commons.cli.HelpFormatter",
+   "file": "src/main/java/org/apache/commons/cli/HelpFormatter.java",
+   "counted": true,
+   "before": {
+    "loc": 425,
+    "wmc": 121,
+    "cbo": 9,
+    "rfc": 77,
+    "lcom": 1092,
+    "lcom*": 0.9549,
+    "tcc": 0,
+    "totalMethodsQty": 49
+   },
+   "after": {
+    "loc": 435,
+    "wmc": 124,
+    "cbo": 9,
+    "rfc": 80,
+    "lcom": 1234,
+    "lcom*": 0.9567,
+    "tcc": 0,
+    "totalMethodsQty": 52
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.HelpFormatter$Builder",
+   "file": "src/main/java/org/apache/commons/cli/HelpFormatter.java",
+   "counted": false,
+   "before": {
+    "loc": 24,
+    "wmc": 6,
+    "cbo": 3,
+    "rfc": 4,
+    "lcom": 4,
+    "lcom*": 0.65,
+    "tcc": 0,
+    "totalMethodsQty": 5
+   },
+   "after": {
+    "loc": 24,
+    "wmc": 6,
+    "cbo": 3,
+    "rfc": 4,
+    "lcom": 4,
+    "lcom*": 0.65,
+    "tcc": 0,
+    "totalMethodsQty": 5
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.HelpFormatter$OptionComparator",
+   "file": "src/main/java/org/apache/commons/cli/HelpFormatter.java",
+   "counted": false,
+   "before": {
+    "loc": 6,
+    "wmc": 1,
+    "cbo": 1,
+    "rfc": 2,
+    "lcom": 0,
+    "lcom*": 1,
+    "tcc": null,
+    "totalMethodsQty": 1
+   },
+   "after": {
+    "loc": 6,
+    "wmc": 1,
+    "cbo": 1,
+    "rfc": 2,
+    "lcom": 0,
+    "lcom*": 1,
+    "tcc": null,
+    "totalMethodsQty": 1
+   }
+  }
+ ],
+ "methods": [
+  {
+   "class": "org.apache.commons.cli.HelpFormatter",
+   "method": "appendOptions/5[A,int,org.apache.commons.cli.Options,int,int]",
+   "status": "target",
+   "line": 407,
+   "before": {
+    "loc": 66,
+    "wmc": 20,
+    "parametersQty": 5,
+    "cbo": 4
+   },
+   "after": {
+    "loc": 29,
+    "wmc": 7,
+    "parametersQty": 5,
+    "cbo": 4
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.HelpFormatter",
+   "method": "buildOptionLabel/2[org.apache.commons.cli.Option,java.lang.String]",
+   "status": "new",
+   "line": 449,
+   "before": null,
+   "after": {
+    "loc": 23,
+    "wmc": 8,
+    "parametersQty": 2,
+    "cbo": 2
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.HelpFormatter",
+   "method": "appendSinceHeader/7[A,int,int,int,int,int,java.lang.String]",
+   "status": "new",
+   "line": 484,
+   "before": null,
+   "after": {
+    "loc": 6,
+    "wmc": 1,
+    "parametersQty": 7,
+    "cbo": 2
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.HelpFormatter",
+   "method": "appendOptionRow/9[A,int,int,int,int,java.lang.String,java.lang.String,org.apache.commons.cli.Option,java.lang.StringBuilder]",
+   "status": "new",
+   "line": 507,
+   "before": null,
+   "after": {
+    "loc": 18,
+    "wmc": 7,
+    "parametersQty": 9,
+    "cbo": 3
+   }
+  }
+ ]
+}

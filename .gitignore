@@ -1,0 +1,25 @@
+# Downloaded toolchains / tools (re-created by the kit; the JDK zip is over GitHub's 100 MB limit)
+refactor-kit/.tools/
+refactor-kit/tools/
+
+# Per-LLM git clones of commons-cli (nested repos with build output). The refactored code of every
+# run is kept in refactor-kit/runs/<llm>/<ID>/refactored/ and changes.patch.
+refactor-kit/workspace/
+
+# Python / local environment
+__pycache__/
+*.pyc
+.python-version
+.venv/
+
+# Local Claude Code settings
+.claude/
+
+# LaTeX build byproducts (report.pdf, figures/ and generated/ are kept so the report builds without Python)
+report/*.aux
+report/*.log
+report/*.out
+report/*.synctex.gz
+
+# Office lock files
+~$*

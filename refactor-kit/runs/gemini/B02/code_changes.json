@@ -1,0 +1,159 @@
+[
+ {
+  "status": "new",
+  "file": "src/main/java/org/apache/commons/cli/DefaultParser.java",
+  "member": "DefaultParser#requiredOptions",
+  "old": null,
+  "new": {
+   "start": 181,
+   "end": 182,
+   "text": "    /** Tracker for the required options and groups expected during parsing. */\n    private RequiredOptions requiredOptions;"
+  }
+ },
+ {
+  "status": "changed",
+  "file": "src/main/java/org/apache/commons/cli/DefaultParser.java",
+  "member": "DefaultParser.checkRequiredOptions()",
+  "old": {
+   "start": 273,
+   "end": 283,
+   "text": "    /**\n     * Throws a {@link MissingOptionException} if all of the required options are not present.\n     *\n     * @throws MissingOptionException if any of the required Options are not present.\n     */\n    protected void checkRequiredOptions() throws MissingOptionException {\n        // if there are required options that have not been processed\n        if (!expectedOpts.isEmpty()) {\n            throw new MissingOptionException(expectedOpts);\n        }\n    }"
+  },
+  "new": {
+   "start": 276,
+   "end": 283,
+   "text": "    /**\n     * Throws a {@link MissingOptionException} if all of the required options are not present.\n     *\n     * @throws MissingOptionException if any of the required Options are not present.\n     */\n    protected void checkRequiredOptions() throws MissingOptionException {\n        requiredOptions.checkAllPresent();\n    }"
+  }
+ },
+ {
+  "status": "changed",
+  "file": "src/main/java/org/apache/commons/cli/DefaultParser.java",
+  "member": "DefaultParser.parse(Options,String[],Properties,boolean)",
+  "old": {
+   "start": 689,
+   "end": 725,
+   "text": "    /**\n     * Parses the arguments according to the specified options and properties.\n     *\n     * @param options the specified Options\n     * @param arguments the command line arguments\n     * @param properties command line option name-value pairs\n     * @param stopAtNonOption if {@code true} an unrecognized argument stops the parsing and the remaining arguments\n     *        are added to the {@link CommandLine}s args list. If {@code false} an unrecognized argument triggers a\n     *        ParseException.\n     *\n     * @return the list of atomic option and value tokens\n     * @throws ParseException if there are any problems encountered while parsing the command line tokens.\n     */\n    public CommandLine parse(final Options options, final String[] arguments, final Properties properties, final boolean stopAtNonOption)\n        throws ParseException {\n        this.options = options;\n        this.stopAtNonOption = stopAtNonOption;\n        skipParsing = false;\n        currentOption = null;\n        expectedOpts = new ArrayList<>(options.getRequiredOptions());\n        // clear the data from the groups\n        for (final OptionGroup group : options.getOptionGroups()) {\n            group.setSelected(null);\n        }\n        cmd = CommandLine.builder().setDeprecatedHandler(deprecatedHandler).build();\n        if (arguments != null) {\n            for (final String argument : arguments) {\n                handleToken(argument);\n            }\n        }\n        // check the arguments of the last option\n        checkRequiredArgs();\n        // add the default options\n        handleProperties(properties);\n        checkRequiredOptions();\n        return cmd;\n    }"
+  },
+  "new": {
+   "start": 689,
+   "end": 726,
+   "text": "    /**\n     * Parses the arguments according to the specified options and properties.\n     *\n     * @param options the specified Options\n     * @param arguments the command line arguments\n     * @param properties command line option name-value pairs\n     * @param stopAtNonOption if {@code true} an unrecognized argument stops the parsing and the remaining arguments\n     *        are added to the {@link CommandLine}s args list. If {@code false} an unrecognized argument triggers a\n     *        ParseException.\n     *\n     * @return the list of atomic option and value tokens\n     * @throws ParseException if there are any problems encountered while parsing the command line tokens.\n     */\n    public CommandLine parse(final Options options, final String[] arguments, final Properties properties, final boolean stopAtNonOption)\n        throws ParseException {\n        this.options = options;\n        this.stopAtNonOption = stopAtNonOption;\n        skipParsing = false;\n        currentOption = null;\n        requiredOptions = new RequiredOptions(options);\n        expectedOpts = requiredOptions.getExpectedOptions();\n        // clear the data from the groups\n        for (final OptionGroup group : options.getOptionGroups()) {\n            group.setSelected(null);\n        }\n        cmd = CommandLine.builder().setDeprecatedHandler(deprecatedHandler).build();\n        if (arguments != null) {\n            for (final String argument : arguments) {\n                handleToken(argument);\n            }\n        }\n        // check the arguments of the last option\n        checkRequiredArgs();\n        // add the default options\n        handleProperties(properties);\n        checkRequiredOptions();\n        return cmd;\n    }"
+  }
+ },
+ {
+  "status": "changed",
+  "file": "src/main/java/org/apache/commons/cli/DefaultParser.java",
+  "member": "DefaultParser.updateRequiredOptions(Option)",
+  "old": {
+   "start": 755,
+   "end": 775,
+   "text": "    /**\n     * Removes the option or its group from the list of expected elements.\n     *\n     * @param option\n     */\n    private void updateRequiredOptions(final Option option) throws AlreadySelectedException {\n        if (option.isRequired()) {\n            expectedOpts.remove(option.getKey());\n        }\n\n        // if the option is in an OptionGroup make that option the selected option of the group\n        if (options.getOptionGroup(option) != null) {\n            final OptionGroup group = options.getOptionGroup(option);\n\n            if (group.isRequired()) {\n                expectedOpts.remove(group);\n            }\n\n            group.setSelected(option);\n        }\n    }"
+  },
+  "new": {
+   "start": 756,
+   "end": 763,
+   "text": "    /**\n     * Removes the option or its group from the list of expected elements.\n     *\n     * @param option\n     */\n    private void updateRequiredOptions(final Option option) throws AlreadySelectedException {\n        requiredOptions.markSeen(option, options.getOptionGroup(option));\n    }"
+  }
+ },
+ {
+  "status": "changed",
+  "file": "src/main/java/org/apache/commons/cli/Parser.java",
+  "member": "(package & imports)",
+  "old": {
+   "start": 1,
+   "end": 25,
+   "text": "/*\n  Licensed to the Apache Software Foundation (ASF) under one or more\n  contributor license agreements.  See the NOTICE file distributed with\n  this work for additional information regarding copyright ownership.\n  The ASF licenses this file to You under the Apache License, Version 2.0\n  (the \"License\"); you may not use this file except in compliance with\n  the License.  You may obtain a copy of the License at\n\n      http://www.apache.org/licenses/LICENSE-2.0\n\n  Unless required by applicable law or agreed to in writing, software\n  distributed under the License is distributed on an \"AS IS\" BASIS,\n  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n  See the License for the specific language governing permissions and\n  limitations under the License.\n */\n\npackage org.apache.commons.cli;\n\nimport java.util.ArrayList;\nimport java.util.Arrays;\nimport java.util.Enumeration;\nimport java.util.List;\nimport java.util.ListIterator;\nimport java.util.Properties;"
+  },
+  "new": {
+   "start": 1,
+   "end": 24,
+   "text": "/*\n  Licensed to the Apache Software Foundation (ASF) under one or more\n  contributor license agreements.  See the NOTICE file distributed with\n  this work for additional information regarding copyright ownership.\n  The ASF licenses this file to You under the Apache License, Version 2.0\n  (the \"License\"); you may not use this file except in compliance with\n  the License.  You may obtain a copy of the License at\n\n      http://www.apache.org/licenses/LICENSE-2.0\n\n  Unless required by applicable law or agreed to in writing, software\n  distributed under the License is distributed on an \"AS IS\" BASIS,\n  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n  See the License for the specific language governing permissions and\n  limitations under the License.\n */\n\npackage org.apache.commons.cli;\n\nimport java.util.Arrays;\nimport java.util.Enumeration;\nimport java.util.List;\nimport java.util.ListIterator;\nimport java.util.Properties;"
+  }
+ },
+ {
+  "status": "changed",
+  "file": "src/main/java/org/apache/commons/cli/Parser.java",
+  "member": "Parser#requiredOptions",
+  "old": {
+   "start": 40,
+   "end": 41,
+   "text": "    /** List of required options strings */\n    private List requiredOptions;"
+  },
+  "new": {
+   "start": 39,
+   "end": 40,
+   "text": "    /** Tracker of required options and option groups */\n    private RequiredOptions requiredOptions;"
+  }
+ },
+ {
+  "status": "changed",
+  "file": "src/main/java/org/apache/commons/cli/Parser.java",
+  "member": "Parser.checkRequiredOptions()",
+  "old": {
+   "start": 43,
+   "end": 53,
+   "text": "    /**\n     * Throws a {@link MissingOptionException} if all of the required options are not present.\n     *\n     * @throws MissingOptionException if any of the required Options are not present.\n     */\n    protected void checkRequiredOptions() throws MissingOptionException {\n        // if there are required options that have not been processed\n        if (!getRequiredOptions().isEmpty()) {\n            throw new MissingOptionException(getRequiredOptions());\n        }\n    }"
+  },
+  "new": {
+   "start": 42,
+   "end": 49,
+   "text": "    /**\n     * Throws a {@link MissingOptionException} if all of the required options are not present.\n     *\n     * @throws MissingOptionException if any of the required Options are not present.\n     */\n    protected void checkRequiredOptions() throws MissingOptionException {\n        requiredOptions.checkAllPresent();\n    }"
+  }
+ },
+ {
+  "status": "changed",
+  "file": "src/main/java/org/apache/commons/cli/Parser.java",
+  "member": "Parser.getRequiredOptions()",
+  "old": {
+   "start": 75,
+   "end": 82,
+   "text": "    /**\n     * Gets the required options.\n     *\n     * @return the required options.\n     */\n    protected List getRequiredOptions() {\n        return requiredOptions;\n    }"
+  },
+  "new": {
+   "start": 71,
+   "end": 78,
+   "text": "    /**\n     * Gets the required options.\n     *\n     * @return the required options.\n     */\n    protected List getRequiredOptions() {\n        return requiredOptions == null ? null : requiredOptions.getExpectedOptions();\n    }"
+  }
+ },
+ {
+  "status": "changed",
+  "file": "src/main/java/org/apache/commons/cli/Parser.java",
+  "member": "Parser.setOptions(Options)",
+  "old": {
+   "start": 299,
+   "end": 307,
+   "text": "    /**\n     * Sets the options.\n     *\n     * @param options the options.\n     */\n    protected void setOptions(final Options options) {\n        this.options = options;\n        this.requiredOptions = new ArrayList<>(options.getRequiredOptions());\n    }"
+  },
+  "new": {
+   "start": 295,
+   "end": 303,
+   "text": "    /**\n     * Sets the options.\n     *\n     * @param options the options.\n     */\n    protected void setOptions(final Options options) {\n        this.options = options;\n        this.requiredOptions = new RequiredOptions(options);\n    }"
+  }
+ },
+ {
+  "status": "changed",
+  "file": "src/main/java/org/apache/commons/cli/Parser.java",
+  "member": "Parser.updateRequiredOptions(Option)",
+  "old": {
+   "start": 309,
+   "end": 329,
+   "text": "    /**\n     * Removes the option or its group from the list of expected elements.\n     *\n     * @param opt\n     */\n    private void updateRequiredOptions(final Option opt) throws ParseException {\n        // if the option is a required option remove the option from\n        // the requiredOptions list\n        if (opt.isRequired()) {\n            getRequiredOptions().remove(opt.getKey());\n        }\n        // if the option is in an OptionGroup make that option the selected\n        // option of the group\n        if (getOptions().getOptionGroup(opt) != null) {\n            final OptionGroup group = getOptions().getOptionGroup(opt);\n            if (group.isRequired()) {\n                getRequiredOptions().remove(group);\n            }\n            group.setSelected(opt);\n        }\n    }"
+  },
+  "new": {
+   "start": 305,
+   "end": 312,
+   "text": "    /**\n     * Removes the option or its group from the list of expected elements.\n     *\n     * @param opt\n     */\n    private void updateRequiredOptions(final Option opt) throws ParseException {\n        requiredOptions.markSeen(opt, getOptions().getOptionGroup(opt));\n    }"
+  }
+ },
+ {
+  "status": "new file",
+  "file": "src/main/java/org/apache/commons/cli/RequiredOptions.java",
+  "member": "(whole file)",
+  "old": null,
+  "new": {
+   "start": 1,
+   "end": 79,
+   "text": "/*\n  Licensed to the Apache Software Foundation (ASF) under one or more\n  contributor license agreements.  See the NOTICE file distributed with\n  this work for additional information regarding copyright ownership.\n  The ASF licenses this file to You under the Apache License, Version 2.0\n  (the \"License\"); you may not use this file except in compliance with\n  the License.  You may obtain a copy of the License at\n\n      http://www.apache.org/licenses/LICENSE-2.0\n\n  Unless required by applicable law or agreed to in writing, software\n  distributed under the License is distributed on an \"AS IS\" BASIS,\n  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n  See the License for the specific language governing permissions and\n  limitations under the License.\n */\n\npackage org.apache.commons.cli;\n\nimport java.util.ArrayList;\nimport java.util.List;\n\n/**\n * Tracks the required options and option groups that are still expected during command-line parsing.\n */\nfinal class RequiredOptions {\n\n    /** The list of required option keys and required OptionGroup instances still expected. */\n    private final List<Object> expectedOpts;\n\n    /**\n     * Constructs a new tracker initialized with the required options from {@code options}.\n     *\n     * @param options the Options being parsed\n     */\n    RequiredOptions(final Options options) {\n        this.expectedOpts = new ArrayList<>(options.getRequiredOptions());\n    }\n\n    /**\n     * Throws a {@link MissingOptionException} if any required options or option groups have not been seen.\n     *\n     * @throws MissingOptionException if any required options are still missing\n     */\n    void checkAllPresent() throws MissingOptionException {\n        if (!expectedOpts.isEmpty()) {\n            throw new MissingOptionException(expectedOpts);\n        }\n    }\n\n    /**\n     * Gets the live mutable list of still-expected options and groups for subclass compatibility.\n     *\n     * @return the list of still-expected required options and groups\n     */\n    List<Object> getExpectedOptions() {\n        return expectedOpts;\n    }\n\n    /**\n     * Records that {@code option} (and its enclosing {@code group}, if any) has been seen during parsing.\n     *\n     * @param option the option that was matched\n     * @param group the OptionGroup containing {@code option}, or {@code null} if none\n     * @throws AlreadySelectedException if another option in {@code group} was already selected\n     */\n    void markSeen(final Option option, final OptionGroup group) throws AlreadySelectedException {\n        if (option.isRequired()) {\n            expectedOpts.remove(option.getKey());\n        }\n        if (group != null) {\n            if (group.isRequired()) {\n                expectedOpts.remove(group);\n            }\n            group.setSelected(option);\n        }\n    }\n}\n"
+  }
+ }
+]

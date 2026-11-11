@@ -1,0 +1,173 @@
+diff --git a/src/main/java/org/apache/commons/cli/HelpFormatter.java b/src/main/java/org/apache/commons/cli/HelpFormatter.java
+index 2e86455..f9825ab 100644
+--- a/src/main/java/org/apache/commons/cli/HelpFormatter.java
++++ b/src/main/java/org/apache/commons/cli/HelpFormatter.java
+@@ -393,6 +393,41 @@ public class HelpFormatter {
+         }
+     }
+ 
++    /**
++     * Appends one row of the options table: the padded label, the optional since column and the description (or the deprecation text).
++     *
++     * @param <A> The Appendable implementation.
++     * @param sb The Appendable to place the row into.
++     * @param width The number of characters to display per line.
++     * @param nextLineTabStop The position on the next line for the first tab.
++     * @param option the Option to render.
++     * @param label the label of the option, as built by {@link #buildOptionLabel(Option, String)}.
++     * @param max The width of the label and since columns together.
++     * @param maxSince The width of the since column, including the left padding.
++     * @param lpad the left padding string.
++     * @param dpad the description padding string.
++     * @throws IOException if an I/O error occurs.
++     */
++    private <A extends Appendable> void appendOptionRow(final A sb, final int width, final int nextLineTabStop, final Option option, final String label,
++            final int max, final int maxSince, final String lpad, final String dpad) throws IOException {
++        final StringBuilder optBuf = new StringBuilder(label);
++        if (optBuf.length() < max) {
++            optBuf.append(createPadding(max - maxSince - optBuf.length()));
++            if (showSince) {
++                optBuf.append(lpad).append(option.getSince() == null ? "-" : option.getSince());
++            }
++            optBuf.append(createPadding(max - optBuf.length()));
++        }
++        optBuf.append(dpad);
++
++        if (deprecatedFormatFunction != null && option.isDeprecated()) {
++            optBuf.append(deprecatedFormatFunction.apply(option).trim());
++        } else if (option.getDescription() != null) {
++            optBuf.append(option.getDescription());
++        }
++        appendWrappedText(sb, width, nextLineTabStop, optBuf.toString());
++    }
++
+     /**
+      * Renders the specified Options and return the rendered Options in a StringBuffer.
+      *
+@@ -419,57 +454,19 @@ public class HelpFormatter {
+             Collections.sort(optList, getOptionComparator());
+         }
+         for (final Option option : optList) {
+-            final StringBuilder optBuf = new StringBuilder();
+-            if (option.getOpt() == null) {
+-                optBuf.append(lpad).append("   ").append(getLongOptPrefix()).append(option.getLongOpt());
+-            } else {
+-                optBuf.append(lpad).append(getOptPrefix()).append(option.getOpt());
+-                if (option.hasLongOpt()) {
+-                    optBuf.append(',').append(getLongOptPrefix()).append(option.getLongOpt());
+-                }
+-            }
+-            if (option.hasArg()) {
+-                final String argName = option.getArgName();
+-                if (argName != null && argName.isEmpty()) {
+-                    // if the option has a blank argname
+-                    optBuf.append(' ');
+-                } else {
+-                    optBuf.append(option.hasLongOpt() ? longOptSeparator : " ");
+-                    optBuf.append("<").append(argName != null ? option.getArgName() : getArgName()).append(">");
+-                }
+-            }
+-
++            final StringBuilder optBuf = buildOptionLabel(option, lpad);
+             prefixList.add(optBuf);
+             max = Math.max(optBuf.length() + maxSince, max);
+         }
+         final int nextLineTabStop = max + descPad;
+         if (showSince) {
+-            final StringBuilder optHeader = new StringBuilder(HEADER_OPTIONS).append(createPadding(max - maxSince - HEADER_OPTIONS.length() + leftPad))
+-                    .append(HEADER_SINCE);
+-            optHeader.append(createPadding(max - optHeader.length())).append(lpad).append(HEADER_DESCRIPTION);
+-            appendWrappedText(sb, width, nextLineTabStop, optHeader.toString());
+-            sb.append(getNewLine());
++            appendSinceHeader(sb, width, nextLineTabStop, max, maxSince, leftPad, lpad);
+         }
+ 
+         int x = 0;
+         for (final Iterator<Option> it = optList.iterator(); it.hasNext();) {
+             final Option option = it.next();
+-            final StringBuilder optBuf = new StringBuilder(prefixList.get(x++).toString());
+-            if (optBuf.length() < max) {
+-                optBuf.append(createPadding(max - maxSince - optBuf.length()));
+-                if (showSince) {
+-                    optBuf.append(lpad).append(option.getSince() == null ? "-" : option.getSince());
+-                }
+-                optBuf.append(createPadding(max - optBuf.length()));
+-            }
+-            optBuf.append(dpad);
+-
+-            if (deprecatedFormatFunction != null && option.isDeprecated()) {
+-                optBuf.append(deprecatedFormatFunction.apply(option).trim());
+-            } else if (option.getDescription() != null) {
+-                optBuf.append(option.getDescription());
+-            }
+-            appendWrappedText(sb, width, nextLineTabStop, optBuf.toString());
++            appendOptionRow(sb, width, nextLineTabStop, option, prefixList.get(x++).toString(), max, maxSince, lpad, dpad);
+             if (it.hasNext()) {
+                 sb.append(getNewLine());
+             }
+@@ -477,6 +474,28 @@ public class HelpFormatter {
+         return sb;
+     }
+ 
++    /**
++     * Appends the "Options / Since / Description" header line of the options table, followed by a new line.
++     *
++     * @param <A> The Appendable implementation.
++     * @param sb The Appendable to place the header into.
++     * @param width The number of characters to display per line.
++     * @param nextLineTabStop The position on the next line for the first tab.
++     * @param max The width of the label and since columns together.
++     * @param maxSince The width of the since column, including the left padding.
++     * @param leftPad the number of characters of padding to be prefixed to each line.
++     * @param lpad the left padding string.
++     * @throws IOException if an I/O error occurs.
++     */
++    private <A extends Appendable> void appendSinceHeader(final A sb, final int width, final int nextLineTabStop, final int max, final int maxSince,
++            final int leftPad, final String lpad) throws IOException {
++        final StringBuilder optHeader = new StringBuilder(HEADER_OPTIONS).append(createPadding(max - maxSince - HEADER_OPTIONS.length() + leftPad))
++                .append(HEADER_SINCE);
++        optHeader.append(createPadding(max - optHeader.length())).append(lpad).append(HEADER_DESCRIPTION);
++        appendWrappedText(sb, width, nextLineTabStop, optHeader.toString());
++        sb.append(getNewLine());
++    }
++
+     /**
+      * Renders the specified text and return the rendered Options in a StringBuffer.
+      *
+@@ -517,6 +536,36 @@ public class HelpFormatter {
+         }
+     }
+ 
++    /**
++     * Builds the left-hand label of an option row in the options table, for example {@code <lpad>-a,--aaa <arg>}.
++     *
++     * @param option the Option to build the label for.
++     * @param lpad the left padding to prefix the label with.
++     * @return a new StringBuilder holding the label.
++     */
++    private StringBuilder buildOptionLabel(final Option option, final String lpad) {
++        final StringBuilder optBuf = new StringBuilder();
++        if (option.getOpt() == null) {
++            optBuf.append(lpad).append("   ").append(getLongOptPrefix()).append(option.getLongOpt());
++        } else {
++            optBuf.append(lpad).append(getOptPrefix()).append(option.getOpt());
++            if (option.hasLongOpt()) {
++                optBuf.append(',').append(getLongOptPrefix()).append(option.getLongOpt());
++            }
++        }
++        if (option.hasArg()) {
++            final String argName = option.getArgName();
++            if (argName != null && argName.isEmpty()) {
++                // if the option has a blank argname
++                optBuf.append(' ');
++            } else {
++                optBuf.append(option.hasLongOpt() ? longOptSeparator : " ");
++                optBuf.append("<").append(argName != null ? option.getArgName() : getArgName()).append(">");
++            }
++        }
++        return optBuf;
++    }
++
+     /**
+      * Creates a String of padding of length {@code len}.
+      *

@@ -1,0 +1,457 @@
+{
+ "run": "B02 - Copilot",
+ "tool": "com.github.mauricioaniche:ck:0.7.0",
+ "measured": "2026-11-10 21:11",
+ "before_commit": "698b238276c0e22e97e4aec703a0b00201d29666",
+ "after_commit": "2ee4dd7058751b5c9dfd85cc543f16e24f692b09",
+ "files": [
+  "src/main/java/org/apache/commons/cli/DefaultParser.java",
+  "src/main/java/org/apache/commons/cli/MissingOptionException.java",
+  "src/main/java/org/apache/commons/cli/Options.java",
+  "src/main/java/org/apache/commons/cli/Parser.java",
+  "src/main/java/org/apache/commons/cli/RequiredOptions.java"
+ ],
+ "class_rule": "the top-level class of every affected file (the smell's target files plus the source files the run changed), plus any other class in those files that holds a target member, is new or removed, or whose CK metrics changed",
+ "metrics": {
+  "Size": {
+   "before": 676,
+   "after": 693,
+   "change": 17,
+   "ck": "loc",
+   "aggregate": "sum",
+   "label": "LOC (CK loc)"
+  },
+  "Cohesion": {
+   "before": 0.7285,
+   "after": 0.6892,
+   "change": -0.0393,
+   "ck": "lcom*",
+   "aggregate": "mean",
+   "label": "LCOM* (CK lcom*, Henderson-Sellers; 0 = cohesive, 1 = no cohesion)"
+  },
+  "Coupling": {
+   "before": 32,
+   "after": 34,
+   "change": 2,
+   "ck": "cbo",
+   "aggregate": "sum",
+   "label": "CBO (CK cbo)"
+  }
+ },
+ "classes": [
+  {
+   "class": "org.apache.commons.cli.DefaultParser",
+   "file": "src/main/java/org/apache/commons/cli/DefaultParser.java",
+   "counted": true,
+   "before": {
+    "loc": 377,
+    "wmc": 121,
+    "cbo": 14,
+    "rfc": 78,
+    "lcom": 149,
+    "lcom*": 0.7968,
+    "tcc": 0,
+    "totalMethodsQty": 31
+   },
+   "after": {
+    "loc": 368,
+    "wmc": 117,
+    "cbo": 13,
+    "rfc": 77,
+    "lcom": 149,
+    "lcom*": 0.8094,
+    "tcc": 0,
+    "totalMethodsQty": 31
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.DefaultParser$Builder",
+   "file": "src/main/java/org/apache/commons/cli/DefaultParser.java",
+   "counted": false,
+   "before": {
+    "loc": 22,
+    "wmc": 5,
+    "cbo": 3,
+    "rfc": 0,
+    "lcom": 4,
+    "lcom*": 0.6,
+    "tcc": 0,
+    "totalMethodsQty": 5
+   },
+   "after": {
+    "loc": 22,
+    "wmc": 5,
+    "cbo": 3,
+    "rfc": 0,
+    "lcom": 4,
+    "lcom*": 0.6,
+    "tcc": 0,
+    "totalMethodsQty": 5
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.MissingOptionException",
+   "file": "src/main/java/org/apache/commons/cli/MissingOptionException.java",
+   "counted": true,
+   "before": {
+    "loc": 27,
+    "wmc": 7,
+    "cbo": 2,
+    "rfc": 8,
+    "lcom": 0,
+    "lcom*": 0.625,
+    "tcc": 0,
+    "totalMethodsQty": 4
+   },
+   "after": {
+    "loc": 27,
+    "wmc": 7,
+    "cbo": 2,
+    "rfc": 8,
+    "lcom": 0,
+    "lcom*": 0.625,
+    "tcc": 0,
+    "totalMethodsQty": 4
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.Options",
+   "file": "src/main/java/org/apache/commons/cli/Options.java",
+   "counted": true,
+   "before": {
+    "loc": 113,
+    "wmc": 29,
+    "cbo": 4,
+    "rfc": 36,
+    "lcom": 93,
+    "lcom*": 0.8,
+    "tcc": 0,
+    "totalMethodsQty": 18
+   },
+   "after": {
+    "loc": 110,
+    "wmc": 28,
+    "cbo": 5,
+    "rfc": 35,
+    "lcom": 93,
+    "lcom*": 0.8,
+    "tcc": 0,
+    "totalMethodsQty": 18
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.Parser",
+   "file": "src/main/java/org/apache/commons/cli/Parser.java",
+   "counted": true,
+   "before": {
+    "loc": 159,
+    "wmc": 51,
+    "cbo": 12,
+    "rfc": 49,
+    "lcom": 30,
+    "lcom*": 0.6923,
+    "tcc": 0,
+    "totalMethodsQty": 13
+   },
+   "after": {
+    "loc": 150,
+    "wmc": 47,
+    "cbo": 11,
+    "rfc": 46,
+    "lcom": 24,
+    "lcom*": 0.7115,
+    "tcc": 0,
+    "totalMethodsQty": 13
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.RequiredOptions",
+   "file": "src/main/java/org/apache/commons/cli/RequiredOptions.java",
+   "counted": true,
+   "before": null,
+   "after": {
+    "loc": 38,
+    "wmc": 12,
+    "cbo": 3,
+    "rfc": 10,
+    "lcom": 0,
+    "lcom*": 0.5,
+    "tcc": 0,
+    "totalMethodsQty": 7
+   }
+  }
+ ],
+ "methods": [
+  {
+   "class": "org.apache.commons.cli.DefaultParser",
+   "method": "checkRequiredOptions/0",
+   "status": "target",
+   "line": 281,
+   "before": {
+    "loc": 5,
+    "wmc": 2,
+    "parametersQty": 0,
+    "cbo": 1
+   },
+   "after": {
+    "loc": 3,
+    "wmc": 1,
+    "parametersQty": 0,
+    "cbo": 1
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.DefaultParser",
+   "method": "parse/4[org.apache.commons.cli.Options,java.lang.String[],java.util.Properties,boolean]",
+   "status": "target",
+   "line": 703,
+   "before": {
+    "loc": 20,
+    "wmc": 4,
+    "parametersQty": 4,
+    "cbo": 6
+   },
+   "after": {
+    "loc": 21,
+    "wmc": 4,
+    "parametersQty": 4,
+    "cbo": 6
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.DefaultParser",
+   "method": "updateRequiredOptions/1[org.apache.commons.cli.Option]",
+   "status": "target",
+   "line": 761,
+   "before": {
+    "loc": 12,
+    "wmc": 4,
+    "parametersQty": 1,
+    "cbo": 3
+   },
+   "after": {
+    "loc": 3,
+    "wmc": 1,
+    "parametersQty": 1,
+    "cbo": 3
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.Options",
+   "method": "addOption/1[org.apache.commons.cli.Option]",
+   "status": "target",
+   "line": 63,
+   "before": {
+    "loc": 14,
+    "wmc": 4,
+    "parametersQty": 1,
+    "cbo": 2
+   },
+   "after": {
+    "loc": 11,
+    "wmc": 3,
+    "parametersQty": 1,
+    "cbo": 3
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.Options",
+   "method": "addOptionGroup/1[org.apache.commons.cli.OptionGroup]",
+   "status": "target",
+   "line": 132,
+   "before": {
+    "loc": 11,
+    "wmc": 3,
+    "parametersQty": 1,
+    "cbo": 3
+   },
+   "after": {
+    "loc": 11,
+    "wmc": 3,
+    "parametersQty": 1,
+    "cbo": 4
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.Options",
+   "method": "getRequiredOptions/0",
+   "status": "target",
+   "line": 268,
+   "before": {
+    "loc": 3,
+    "wmc": 1,
+    "parametersQty": 0,
+    "cbo": 0
+   },
+   "after": {
+    "loc": 3,
+    "wmc": 1,
+    "parametersQty": 0,
+    "cbo": 1
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.Parser",
+   "method": "checkRequiredOptions/0",
+   "status": "target",
+   "line": 51,
+   "before": {
+    "loc": 5,
+    "wmc": 2,
+    "parametersQty": 0,
+    "cbo": 2
+   },
+   "after": {
+    "loc": 3,
+    "wmc": 1,
+    "parametersQty": 0,
+    "cbo": 1
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.Parser",
+   "method": "getRequiredOptions/0",
+   "status": "target",
+   "line": 80,
+   "before": {
+    "loc": 3,
+    "wmc": 1,
+    "parametersQty": 0,
+    "cbo": 0
+   },
+   "after": {
+    "loc": 3,
+    "wmc": 1,
+    "parametersQty": 0,
+    "cbo": 0
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.Parser",
+   "method": "setOptions/1[org.apache.commons.cli.Options]",
+   "status": "target",
+   "line": 304,
+   "before": {
+    "loc": 4,
+    "wmc": 1,
+    "parametersQty": 1,
+    "cbo": 2
+   },
+   "after": {
+    "loc": 5,
+    "wmc": 1,
+    "parametersQty": 1,
+    "cbo": 2
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.Parser",
+   "method": "updateRequiredOptions/1[org.apache.commons.cli.Option]",
+   "status": "target",
+   "line": 315,
+   "before": {
+    "loc": 12,
+    "wmc": 4,
+    "parametersQty": 1,
+    "cbo": 4
+   },
+   "after": {
+    "loc": 3,
+    "wmc": 1,
+    "parametersQty": 1,
+    "cbo": 4
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.RequiredOptions",
+   "method": "RequiredOptions/0",
+   "status": "new",
+   "line": 32,
+   "before": null,
+   "after": {
+    "loc": 3,
+    "wmc": 1,
+    "parametersQty": 0,
+    "cbo": 0
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.RequiredOptions",
+   "method": "RequiredOptions/1[java.util.Collection<?>]",
+   "status": "new",
+   "line": 37,
+   "before": null,
+   "after": {
+    "loc": 3,
+    "wmc": 1,
+    "parametersQty": 1,
+    "cbo": 0
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.RequiredOptions",
+   "method": "addOption/1[java.lang.String]",
+   "status": "new",
+   "line": 42,
+   "before": null,
+   "after": {
+    "loc": 6,
+    "wmc": 2,
+    "parametersQty": 1,
+    "cbo": 0
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.RequiredOptions",
+   "method": "addGroup/1[org.apache.commons.cli.OptionGroup]",
+   "status": "new",
+   "line": 50,
+   "before": null,
+   "after": {
+    "loc": 3,
+    "wmc": 1,
+    "parametersQty": 1,
+    "cbo": 1
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.RequiredOptions",
+   "method": "markSeen/2[org.apache.commons.cli.Option,org.apache.commons.cli.OptionGroup]",
+   "status": "new",
+   "line": 55,
+   "before": null,
+   "after": {
+    "loc": 11,
+    "wmc": 4,
+    "parametersQty": 2,
+    "cbo": 2
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.RequiredOptions",
+   "method": "checkAllPresent/0",
+   "status": "new",
+   "line": 68,
+   "before": null,
+   "after": {
+    "loc": 5,
+    "wmc": 2,
+    "parametersQty": 0,
+    "cbo": 1
+   }
+  },
+  {
+   "class": "org.apache.commons.cli.RequiredOptions",
+   "method": "getOptions/0",
+   "status": "new",
+   "line": 75,
+   "before": null,
+   "after": {
+    "loc": 3,
+    "wmc": 1,
+    "parametersQty": 0,
+    "cbo": 0
+   }
+  }
+ ]
+}
